@@ -1,0 +1,13 @@
+{
+    "type": "code",
+    "modid": "apclient",
+    "name": "Archipelago Client",
+    "authors": [
+        "Crabsoft"
+    ],
+    "description": "This mod acts as the bridge between Archipelago multiworlds and Vintage Story.",
+    "version": "1.0.1",
+    "dependencies": {
+        "game": ""
+    }
+}
