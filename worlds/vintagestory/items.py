@@ -32,7 +32,7 @@ progression_list = {
         #Iron
         "Iron Pickaxe",
         "Steel Pickaxe",
-        "Steel Falx"
+        "Forlorn Hope Estoc", #blade-forlorn-iron
         }
 
 useful_list = {
@@ -40,23 +40,43 @@ useful_list = {
         #Copper Age,
         #Iron Age
         #Any
-        "Bucket"
+        "Bucket",
+        "Copper Shears", #shears-copper
+        "Copper Scythe", #scythe-copper
         }
 
 filler_list = {
         "Prospecting Pick",
-       # "Fireclay x 24", no multiple items yet
+        "Fire Clay", 
         "Storage Vessel",
         "Crock",
-       # "Clay x 24",
+        "Blue Clay",
+        "Red Clay",
         "Copper Chisel",
-       # "Lime x 24",
+        "Lime",
         "Flax Seeds",
-        "Charcoal",
+        "Coal",
        # "Pie", no attributed items yet
         "Temporal Gear",
         "Rusty Gear",
-        "Ore Bomb"
+        "Ore Bomb",
+        "Candle", #candle
+        "Copper Ingot", #ingot-copper
+        "Gold Nugget", #nugget-nativegold 
+        "Silver Nugget", #nugget-nativesilver
+        "Honeycomb", #honeycomb
+        "Flax Twine", #flaxtwine
+        "Leather", #leather-normal-plain
+        "Lackey Hat", #clothes-head-lackey-hat
+        "Nadiyan Beekeeper Hood", #clothes-nadiya-head-beekeeper
+        "Sheepskull Mask", #clothes-face-sheepskull
+        "Pillory", #clothes-neck-pillory
+        "Fortune Teller Hip Scarf", #clothes-waist-fortune-teller-hip-scarf
+        "Tophat", #clothes-head-tophat
+        "Bamboo Cone Hat", #clothes-head-bamboo-conehat
+        "Large Bamboo Cone Hat", #clothes-head-bamboo-conehat-large
+        "Alchemist Hat", #clothes-head-alchemist
+        "Fortune Teller Scarf", #clothes-head-fortune-tellers-scarf
         }
 
 def def_item(name, classification = ItemClassification.filler):
@@ -78,9 +98,6 @@ class VintageItem(Item):
 
 def get_random_filler_item_name(world: VintageWorld) -> str:
    return world.random.choice(list(filler_list))
-   # if world.random.randint(0, 99) < world.options.temporal_chance:
-   #     return "Temporal Gear"
-   # else:
 
 def create_item_with_correct_classification(world: VintageWorld, name: str) -> VintageItem:
     classification = DEFAULT_ITEM_CLASSIFICATIONS[name]
@@ -89,7 +106,6 @@ def create_item_with_correct_classification(world: VintageWorld, name: str) -> V
 
 def create_all_items(world: VintageWorld) -> None:
     #exactly as many items as there are locations
-   # def_item_lists()
     itempool: list[Item] = []
     for each in progression_list:
         itempool.append(world.create_item(each))

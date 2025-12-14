@@ -6,7 +6,7 @@
         "Crabsoft"
     ],
     "description": "This mod acts as the bridge between Archipelago multiworlds and Vintage Story.",
-    "version": "1.0.1",
+    "version": "2.0.0",
     "dependencies": {
         "game": ""
     }

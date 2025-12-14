@@ -144,21 +144,20 @@ namespace Multiworld
 
 		public void OnItemReceived( ReceivedItemsHelper receivedItemsHelper )
 	        {
+		//	Console.WriteLine(session.Items.PeekItem().ItemDisplayName + " incoming");
 			ProcessAPItemQueue();	
 	        }
 
 		public void ProcessAPItemQueue()
 		{
-			IReceivedItemsHelper receivedItemsHelper = session.Items;
-			ItemInfo test = session.Items.PeekItem();
-			//Console.WriteLine($"Items {config.APReceivedIndex} / {receivedItemsHelper.Index}");
-			while( config.APReceivedIndex < receivedItemsHelper.Index )
+			//Console.WriteLine($"Items {config.APReceivedIndex} / {session.Items.Index}");
+			while(config.APReceivedIndex < session.Items.Index)
 			{
-		  		  ap_items_to_receive.Add(ResolveItemCode(receivedItemsHelper.PeekItem().ItemDisplayName));
+		  		  ap_items_to_receive.Add(ResolveItemCode(session.Items.PeekItem().ItemDisplayName));
 		  		  config.APReceivedIndex++;
 			}
 	          		  capi.StoreModConfig(config, "multiworld_config.json");
-	          		  receivedItemsHelper.DequeueItem();
+	          		  session.Items.DequeueItem();
 
 		}
 
@@ -169,10 +168,17 @@ namespace Multiworld
 			{
 				code = "item:game:"+APItemToLocal.items[displayName];
 			}
-			if(APItemToLocal.blocks.Keys.Contains(displayName))
+			else if(APItemToLocal.blocks.Keys.Contains(displayName))
 			{
 				code = "block:game:"+APItemToLocal.blocks[displayName];
 			}
+			else if(APItemToLocal.quantity.Keys.Contains(displayName))
+			{
+				int rand = capi.World.Rand.Next(1,25);
+				code = "quantity:game:"+APItemToLocal.quantity[displayName]+":"+rand.ToString();
+			}
+			if(code == displayName)
+				Console.WriteLine("Failed to resolve code: " + code);
 			return code;
 		}	
 		
@@ -194,10 +200,25 @@ namespace Multiworld
 	    {"Flax Seeds", "seeds-flax"},
 	    {"Charcoal", "charcoal"},
 	    {"Temporal Gear", "gear-temporal"},
-	    {"Rusty Gear", "gear-rusty"},
-            //{"Fireclay x 64", "clay-fire"},//these 3 need quantity
-	    //{"Clay x 24", "clay-blue"},
-	    //{"Lime x24", "lime"},
+	    {"Forlorn Hope Estoc", "blade-forlorn-iron"},
+	    {"Copper Shears", "shears-copper"},
+	    {"Copper Scythe", "scythe-copper"},
+	    {"Candle", "candle"},
+	    {"Copper Ingot", "ingot-copper"},
+	    {"Gold Nugget", "nugget-nativegold"},
+	    {"Silver Nugget", "nugget-nativesilver"},
+	    {"Honeycomb", "honeycomb"},
+	    {"Leather", "leather-normal-plain"},
+	    {"Lackey Hat", "clothes-head-lackey-hat"},
+	    {"Nadiyan Beekeeper Hood", "clothes-nadiya-head-beekeeper"},
+	    {"Sheepskull Mask", "clothes-face-sheepskull"},
+	    {"Pillory", "clothes-neck-pillory"},
+	    {"Fortune Teller Hip Scarf", "clothes-waist-fortune-teller-hip-scarf"},
+	    {"Tophat", "clothes-head-tophat"},
+	    {"Bamboo Cone Hat", "clothes-head-bamboo-conehat"},
+	    {"Large Bamboo Cone Hat", "clothes-head-bamboo-conehat-large"},
+	    {"Alchemist Hat", "clothes-head-alchemist"},
+	    {"Fortune Teller Scarf", "clothes-head-fortune-tellers-scarf"},
 	    
         };
 
@@ -216,6 +237,18 @@ namespace Multiworld
             {"Bucket", "woodbucket"},
 
 	};
+
+	public static Dictionary<string, string> quantity = new Dictionary<string, string>
+	{
+		{"Fire Clay", "clay-fire"},
+		{"Blue Clay", "clay-blue"},
+		{"Red Clay", "clay-red"},
+		{"Lime", "lime"},
+		{"Coal", "coal"},
+	    	{"Flax Twine", "flaxtwine"},
+	    	{"Rusty Gear", "gear-rusty"},
+		
+	};
     }
 
 	public void OnPacketReceived(ArchipelagoPacketBase packet)
@@ -232,12 +265,12 @@ namespace Multiworld
 						config.win_condition = "Steel";
 					capi.ShowChatMessage("Connected to Archipelago Server");
 					break;
-				case ReceivedItemsPacket itemPacket:
-				//	foreach(NetworkItem item in itemPacket.Items)
-				//	{
-				//		Console.WriteLine($"[ItemPacket] ItemID={item.Item}");
-				//	}
-					break;
+			//	case ReceivedItemsPacket itemPacket:
+			//		foreach(NetworkItem item in itemPacket.Items)
+			//		{
+			//			Console.WriteLine($"[ItemPacket] ItemID={item.Item}");
+			//		}
+			//		break;
 				default:
 					break;
 			}

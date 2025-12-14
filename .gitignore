@@ -5,3 +5,5 @@ build
 worlds/vintagestory/__pycache__
 *.dll
 *.pdb
+*.apworld
+*.zip

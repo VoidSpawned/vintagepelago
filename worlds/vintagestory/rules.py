@@ -19,7 +19,7 @@ def set_all_rules(world: VintageWorld) -> None:
     set_all_item_rules(world)
 
 def set_all_entrance_rules(world: VintageWorld) -> None:
-    filler_to_stone = world.get_entrance("Filler to Stone")
+    #filler_to_stone = world.get_entrance("Filler to Stone")
     stone_to_copper = world.get_entrance("Stone to Copper")
     copper_to_bronze = world.get_entrance("Copper to Bronze")
     bronze_to_iron = world.get_entrance("Bronze to Iron")
@@ -31,7 +31,7 @@ def set_all_entrance_rules(world: VintageWorld) -> None:
 
     set_rule(copper_to_bronze, lambda state: state.has_any(["Ore Bomb", "Prospecting Pick", "Black Bronze Pickaxe", "Iron Pickaxe", "Steel Pickaxe"], world.player))
     
-    set_rule(bronze_to_iron, lambda state: state.has("Steel Falx", world.player))
+    set_rule(bronze_to_iron, lambda state: state.has("Forlorn Hope Estoc", world.player))
                     #lambda = "i'm gonna make a one time function"
                     #so because it has to be a function in slot 2, we make one with one statement
 
@@ -50,15 +50,3 @@ def block_progression_items(world:VintageWorld) -> None:
     for location in world.location_names: 
         if not "Achievement" in location: #achievements should always progress
             add_item_rule(world.multiworld.get_location(location, world.player), lambda item: ItemClassification.progression not in item.classification)
-            #if "Trader" in location and not world.options.trader_progression.value: 
-                #add_item_rule(world.multiworld.get_location(location, world.player), lambda item: ItemClassification.progression not in item.classification)
-                
-                
-           # elif "Dungeon" in location and not world.options.dungeon_progression.value:
-           #     add_item_rule(world.multiworld.get_location(location, world.player), lambda item: item.classification != ItemClassification.progression)
-           #     #default non-optional locations to block, due to the procedural nature of the game
-           # else:
-           #     add_item_rule(world.multiworld.get_location(location, world.player), lambda item: item.classification != ItemClassification.progression)
-                
-                
-            

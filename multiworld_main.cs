@@ -30,7 +30,7 @@ namespace Multiworld
 		{"anvil-bismuthbronze","Bronze Age"},
 		{"anvil-blackbronze","Bronze Age"},
 		{"anvil-iron","Iron Age"},
-		{"anvil-steel","Steel Age"}
+		//{"anvil-steel","Steel Age"} no such thing in survival!
 	};
 
 	public Dictionary<string, string> ItemPickupAchievements = new Dictionary<string, string>
@@ -44,15 +44,15 @@ namespace Multiworld
 		{"claypot-orange-fired","Stone Age"},
 		{"claypot-red-fired","Stone Age"},
 		{"claypot-tan-fired","Stone Age"},
-		{"bowl-blue-meal","Cook A Meal"},
-		{"bowl-fire-meal","Cook A Meal"},
-		{"bowl-black-meal","Cook A Meal"},
-		{"bowl-brown-meal","Cook A Meal"},
-		{"bowl-cream-meal","Cook A Meal"},
-		{"bowl-gray-meal","Cook A Meal"},
-		{"bowl-orange-meal","Cook A Meal"},
-		{"bowl-red-meal","Cook A Meal"},
-		{"bowl-tan-meal","Cook A Meal"},
+		{"bowl-blue-meal","Cook a Meal"},
+		{"bowl-fire-meal","Cook a Meal"},
+		{"bowl-black-meal","Cook a Meal"},
+		{"bowl-brown-meal","Cook a Meal"},
+		{"bowl-cream-meal","Cook a Meal"},
+		{"bowl-gray-meal","Cook a Meal"},
+		{"bowl-orange-meal","Cook a Meal"},
+		{"bowl-red-meal","Cook a Meal"},
+		{"bowl-tan-meal","Cook a Meal"},
 		{"wateringcan-blue-fired","Farming"},
 		{"wateringcan-fire-fired","Farming"},
 		{"wateringcan-black-fired","Farming"},
@@ -64,9 +64,11 @@ namespace Multiworld
 		{"wateringcan-tan-fired","Farming"},
 		{"charcoal","Charcoal"},
 	//	{"","Casting"},		//no good method for detecing the pour
-		{"perfect-pie","Pie"},
+		{"pie-perfect","Pie"},
 		{"lantern-up","Lanterns"},
-		{"windmillrotor-north","Automation"}
+		{"windmillrotor-north","Automation"},
+		{"inkandquill", "Write a Book"},
+		{"ingot-steel","Steel Age"} //placeholder win condition
 	};
 
 	public Dictionary<string, string> KillAchievements = new Dictionary<string, string>
@@ -81,6 +83,15 @@ namespace Multiworld
 		{"bear-panda-adult-male","Defeat a Bear"},
 		{"bear-polar-adult-female","Defeat a Bear"},
 		{"bear-polar-adult-male","Defeat a Bear"},
+		{"shiver-surface","Defeat a Shiver"},
+		{"shiver-deep","Defeat a Shiver"},
+		{"shiver-tainted","Defeat a Shiver"},
+		{"shiver-corrupt","Defeat a Shiver"},
+		{"shiver-nightmare","Defeat a Shiver"},
+		{"shiver-stilt","Defeat a Shiver"},
+		{"shiver-bellhead","Defeat a Shiver"},
+		{"shiver-deepsplit","Defeat a Shiver"},
+		//	any corrupted : Against the Storm is handled manually in the kill check
 	};
 
 
@@ -139,7 +150,6 @@ namespace Multiworld
 		capi.Event.RegisterGameTickListener(infranet.RequestAPItemReceive, 1000*3);	    
 	    capi.Event.LevelFinalize += OnLevelFinalize;
 	    capi.Event.LeaveWorld += OnLeaveWorld;
-	    capi.Event.OnEntityDespawn += OnClientPickup;
 
 	    infranet.init_client(api, ap_client);
 	}
@@ -168,12 +178,32 @@ namespace Multiworld
 				{
 					foreach(ItemSlot slot in inv.Value)
 					{
-						if(slot != null && slot.Itemstack != null && slot.Itemstack.Attributes["ap_item"] != null && slot.Itemstack.Attributes.GetBool("ap_item", false))
+						if(slot != null && slot.Itemstack != null)
 						{
-							TriggerAchievement(slot.Itemstack.Attributes.GetString("location"), player);
-							slot.Itemstack = null;
-							slot.MarkDirty();
-						}
+							ItemStack stack = slot.Itemstack;
+							if( stack.Attributes["ap_item"] != null && stack.Attributes.GetBool("ap_item", false))
+							{
+								TriggerAchievement(stack.Attributes.GetString("location"), player);
+								slot.Itemstack = null;
+								slot.MarkDirty();
+							}
+							else 
+							{
+								string code = "";
+								switch(stack.Class)
+								{
+									case EnumItemClass.Block:
+										code = stack.Block.Code.ToString();
+										break;
+									case EnumItemClass.Item:
+										code = stack.Item.Code.ToString();
+										break;
+								}
+								code = code.Split(':')[1];
+								if(ItemPickupAchievements.Keys.Contains(code))
+									TriggerAchievement("Achievement: " + ItemPickupAchievements[code], player);
+							}
+						}	
 					}
 				
 				}
@@ -220,25 +250,9 @@ namespace Multiworld
 				IServerPlayer player = (IServerPlayer)sapi.World.PlayerByUid(ePlayer.PlayerUID);
 				if(KillAchievements.Keys.Contains(code))
 					TriggerAchievement("Achievement: "+KillAchievements[code], player);
+				if(code.Contains("corrupt"))
+					TriggerAchievement("Achievement: Against the Storm", player);
 			}
-	}
-
-	public void OnClientPickup(Entity entity, EntityDespawnData despawn)
-	{ //Check for item pickup achievements like pie
-		if(entity is EntityItem item && despawn.Reason == EnumDespawnReason.PickedUp)		{
-			
-		       	if(entity.Pos.XYZ.DistanceTo(capi.World.Player.Entity.Pos.XYZ) > 5.0)
-				return;	
-
-			string code = "";
-			if(item.Itemstack.Item != null)
-				code = item.Itemstack.Item.Code.ToString().Split(':')[1];
-			else if(item.Itemstack.Block != null)
-				code = item.Itemstack.Block.Code.ToString().Split(':')[1];
-			//Console.WriteLine($"Picked up: {code}");
-			if(ItemPickupAchievements.Keys.Contains(code))	
-				ap_client.LocationCheck("Achievement: "+ItemPickupAchievements[code], ap_client.config.VSName);
-		}
 	}
 
 	public void OnDidUseBlock(IServerPlayer byPlayer, BlockSelection blockSel)
@@ -260,7 +274,6 @@ namespace Multiworld
 			loc_list.Remove(loc);
 			sapi.StoreModConfig(loc_list, byPlayer.PlayerName+"_spoilers.json");
 		}
-
 	}
 
 	public void OnPlayerInteractEntity(Entity entity, IPlayer byPlayer, ItemSlot slot, Vec3d hitPosition, int mode, ref EnumHandling handling)
@@ -269,20 +282,13 @@ namespace Multiworld
 		{
 			Dictionary<string, Dictionary<string, string>> spoilers = sapi.LoadModConfig<Dictionary<string, Dictionary<string, string>>>(byPlayer.PlayerName+"_spoilers.json");
 			var inv = trader.Inventory as InventoryTrader;
-			int count = 0;
 
-		//	for(int i = 0; i < inv.SellingSlots.Length;i++)
-		//	{
-		//	    inv[i].Itemstack = null;
-		//	    inv[i].MarkDirty();
-		//	}         
-			
 			foreach(var kvp in spoilers)
 			{
 				string match = "";
 				switch(trader.Code.ToString().Split(':')[1])
 				{
-					case "humanoid-trader-agriculture":
+					case "humanoid-trader-foods":
 						match = "Agriculture";
 						break;
 					case "humanoid-trader-artisan":
@@ -314,9 +320,12 @@ namespace Multiworld
 					continue;	
 				if(kvp.Key.Contains(match + " Trader"))
 				{
-					inv[count].Itemstack = null;
-					SetAPSellSlot(inv.SellingSlots[count], kvp.Key, kvp.Value);
-					count++;
+					string[] numString = kvp.Key.Split(' ');
+					int slotNum = 0;
+					if(numString.Length > 2)
+						slotNum = int.Parse(numString[2]) - 1;
+					inv[slotNum].Itemstack = null;
+					SetAPSellSlot(inv.SellingSlots[slotNum], kvp.Key, kvp.Value);
 				}
 			}
 

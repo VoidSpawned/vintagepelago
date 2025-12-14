@@ -146,7 +146,8 @@ namespace Multiworld
 				Item newItem;
 				Block newBlock;
 				ItemStack stack = null;
-				if(split[0] == "item")
+				int count = 1;
+				if(split[0] == "item" || split[0] == "quantity")
 				{
 					newItem = sapi.World.GetItem(new AssetLocation(split[2]));
 					if(newItem == null)
@@ -154,7 +155,9 @@ namespace Multiworld
 						Console.WriteLine($"{items[i]} ITEM CODE NOT FOUND SERVER SIDE");
 						continue;
 					}
-					stack = new ItemStack(newItem, 1);
+					if(split[0] == "quantity")
+						count = int.Parse(split[3]);
+					stack = new ItemStack(newItem, count);
 				}
 				else if(split[0] == "block")
 				{
@@ -166,8 +169,7 @@ namespace Multiworld
 					}
 					stack = new ItemStack(newBlock, 1);
 				}
-				//string code = ap_client.ResolveItemCode(items[i]);
-			//	Item newItem = sapi.World.GetItem(new AssetLocation(items[i]));
+				
 				if(stack == null)
 					continue;
 
