@@ -25,13 +25,13 @@ def set_all_entrance_rules(world: VintageWorld) -> None:
     bronze_to_iron = world.get_entrance("Bronze to Iron")
     #iron_to_steel = world.get_entrance("Iron to Steel")
 
-    set_rule(stone_to_copper, lambda state: state.has("Cookpot", world.player)
+    set_rule(stone_to_copper, lambda state: state.has("Crucible", world.player)
              and state.has("Bowl", world.player)
              and state.has("Quern", world.player))
 
-    set_rule(copper_to_bronze, lambda state: state.has_any(["Ore Bomb", "Prospecting Pick", "Black Bronze Pickaxe", "Iron Pickaxe", "Steel Pickaxe"], world.player))
+    set_rule(copper_to_bronze, lambda state: state.has_any(["Ore Bomb", "Prospecting Pick", "Black Bronze Pickaxe"], world.player))
     
-    set_rule(bronze_to_iron, lambda state: state.has("Forlorn Hope Estoc", world.player))
+    set_rule(bronze_to_iron, lambda state: state.has_any("Iron Pickaxe", "Steel Pickaxe", world.player))
                     #lambda = "i'm gonna make a one time function"
                     #so because it has to be a function in slot 2, we make one with one statement
 
