@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="multiworld/multiworld.csproj" />
+  <Project Path="ZZCakeBuild/CakeBuild.csproj" />
+</Solution>
