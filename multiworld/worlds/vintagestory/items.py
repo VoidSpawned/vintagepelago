@@ -43,6 +43,7 @@ useful_list = {
         "Bucket",
         "Copper Shears", #shears-copper
         "Copper Scythe", #scythe-copper
+        #Tamed Elk
         }
 
 filler_list = {

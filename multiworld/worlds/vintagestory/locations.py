@@ -34,7 +34,7 @@ bronze_age_list = [
 iron_age_list = [
         "Achievement: Iron Age",
         "Achievement: Automation",
-        "Achievement: Steel Age" #steel anvil isn't real, what to detect?
+        "Achievement: Steel Age" #steel anvil isn't real, So we detect a steel ingot instead
         ]
 
 filler_list = [
