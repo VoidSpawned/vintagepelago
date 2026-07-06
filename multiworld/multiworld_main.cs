@@ -135,7 +135,7 @@ namespace Multiworld
 			capi.ChatCommands
 				.Create("apname")
 				.WithDescription("Set the Archipelago slotname")
-				.WithArgs(capi.ChatCommands.Parsers.Word("apname"))
+				.WithArgs(capi.ChatCommands.Parsers.OptionalAll("apname"))
 				.HandleWith(infranet.apname);
 		
 			capi.ChatCommands
@@ -153,7 +153,7 @@ namespace Multiworld
 			capi.ChatCommands
 				.Create("appassword")
 				.WithDescription("Sets the Archipelago password")
-				.WithArgs(capi.ChatCommands.Parsers.Word("password"))
+				.WithArgs(capi.ChatCommands.Parsers.OptionalAll("password"))
 				.HandleWith(infranet.set_pass);
 
 			capi.ChatCommands
