@@ -104,6 +104,13 @@ namespace Multiworld
 			return TextCommandResult.Success($"APPort set to {args[0]}");
 		}
 
+		public TextCommandResult set_pass(TextCommandCallingArgs args)
+		{ //sets your rooms password for Archipelago
+			ap_client.config.Password = args[0].ToString();
+			capi.StoreModConfig(ap_client.config, "multiworld_config.json");
+			return TextCommandResult.Success($"APPassword set");
+		}
+
 		public TextCommandResult print_remaining_locations(TextCommandCallingArgs args)
 		{ //print a list of unchecked locations
 			Dictionary<string, Dictionary<string, string>> dict = ap_client.GetScoutData();

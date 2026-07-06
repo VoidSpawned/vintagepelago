@@ -15,6 +15,7 @@ using Vintagestory.API.Client;
 using Vintagestory.API.Server;
 using Vintagestory.API.Config;
 using Vintagestory.API.Common;
+using Vintagestory.API.Util;
 
 //this file manages the VS client's connection to AP, it will have utils for handling the session, item receipt, etc, any direct communication to AP
 namespace Multiworld
@@ -24,8 +25,10 @@ namespace Multiworld
 		public string APName = "VoidSpawned";
 		public string APIP = "localhost";
 		public int APPort = 38281;
-		public string VSName = "playwordsofpower";
+		public string VSName = "VoidSpawned";
+		public string Password = "";
 		public string win_condition = "Iron";
+		public int traderPrices = 25;
 		public int APReceivedIndex = 0;
 		public Dictionary<string, Dictionary<string, string>> APData;
     	}
@@ -89,7 +92,7 @@ namespace Multiworld
 			LoadClientConfig();
 			session = ArchipelagoSessionFactory.CreateSession(config.APIP, config.APPort);
 			ConnectSignals(); //must sub to events before logging in
-            LoginResult result = session.TryConnectAndLogin("Vintage Story", config.APName, ItemsHandlingFlags.AllItems, requestSlotData: true);
+            LoginResult result = session.TryConnectAndLogin("Vintage Story", config.APName, ItemsHandlingFlags.AllItems, requestSlotData: true, password: config.Password);
 			if(result.Successful)
 				session.Socket.SendPacket(new SyncPacket());
 		}
@@ -253,7 +256,7 @@ namespace Multiworld
 
 	public void OnPacketReceived(ArchipelagoPacketBase packet)
 	        { //Function for debugging
-			switch(packet)
+			switch (packet)
 			{
 				case DataPackagePacket dataPacket:
 					break;
@@ -261,8 +264,9 @@ namespace Multiworld
 					break;
 				case ConnectedPacket connPacket:
 					bool steel = (connPacket.SlotData["steel"].ToString() == "1");
-					if(steel == true)
+					if (steel == true)
 						config.win_condition = "Steel";
+					config.traderPrices = connPacket.SlotData["prices"].ToString().ToInt();
 					capi.ShowChatMessage("Connected to Archipelago Server");
 					break;
 			//	case ReceivedItemsPacket itemPacket:

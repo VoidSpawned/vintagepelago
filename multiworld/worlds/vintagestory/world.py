@@ -35,4 +35,4 @@ class VintageWorld(World):
         return items.get_random_filler_item_name(self)
 
     def fill_slot_data(self) -> Mapping[str, Any]:
-        return self.options.as_dict("casual", "steel")#, "temporal_chance", "trader_progression")
+        return self.options.as_dict("casual", "steel", "prices")#, "temporal_chance", "trader_progression")

@@ -7,6 +7,15 @@ class Casual(Toggle):
     """
     display_name = "Casual"
 
+class Prices(Range):
+    """
+        Price for AP items from traders
+    """
+    display_name = "Price for the traders AP items"
+    range_start = 10
+    range_end = 100
+    default = 25
+
 class Steel(DefaultOnToggle):
     """
         Must reach Steel to win
@@ -39,6 +48,7 @@ class Steel(DefaultOnToggle):
 class VintageOptions(PerGameCommonOptions):
     casual: Casual
     steel: Steel
+    prices: Prices
 #    temporal_chance: TemporalChance
 #    trader_progression: TraderProgression
 #    dungeon_progression: DungeonProgression

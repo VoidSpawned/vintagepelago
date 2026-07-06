@@ -1,15 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using Archipelago.MultiClient.Net;
 using System;
+using System.Collections.Generic;
+using System.Numerics;
 //
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
-using Vintagestory.API.Datastructures;
-using Vintagestory.API.Server;
-using Vintagestory.API.MathTools;
 using Vintagestory.API.Config;
+using Vintagestory.API.Datastructures;
+using Vintagestory.API.MathTools;
+using Vintagestory.API.Server;
+using Vintagestory.API.Util;
 using Vintagestory.GameContent;
-using Archipelago.MultiClient.Net;
 
 namespace Multiworld
 {
@@ -20,7 +22,8 @@ namespace Multiworld
 	Infranet infranet = new Infranet();
 	APClient ap_client = new APClient();
 
-	public Dictionary<string, string> UseBlockAchievements = new Dictionary<string, string> 
+
+    public Dictionary<string, string> UseBlockAchievements = new Dictionary<string, string> 
 	{
 		{"quern-granite","Quernal Sanders"},
 		{"quern-andesite","Quernal Sanders"},
@@ -146,7 +149,13 @@ namespace Multiworld
 				.WithDescription("Set the Archipelago Port")
 				.WithArgs(capi.ChatCommands.Parsers.Int("port"))
 				.HandleWith(infranet.set_port);
-		
+
+			capi.ChatCommands
+				.Create("appassword")
+				.WithDescription("Sets the Archipelago password")
+				.WithArgs(capi.ChatCommands.Parsers.Word("password"))
+				.HandleWith(infranet.set_pass);
+
 			capi.ChatCommands
 				.Create("aplocations")
 				.WithDescription("Print a list of remaining checks")
@@ -296,7 +305,9 @@ namespace Multiworld
 		if(entity is EntityTrader trader)
 		{
 			Dictionary<string, Dictionary<string, string>> spoilers = sapi.LoadModConfig<Dictionary<string, Dictionary<string, string>>>(byPlayer.PlayerName+"_spoilers.json");
-			var inv = trader.Inventory as InventoryTrader;
+
+				int prices = 10;
+            var inv = trader.Inventory as InventoryTrader;
 
 			foreach(var kvp in spoilers)
 			{
@@ -340,7 +351,7 @@ namespace Multiworld
 					if(numString.Length > 2)
 						slotNum = int.Parse(numString[2]) - 1;
 					inv[slotNum].Itemstack = null;
-					SetAPSellSlot(inv.SellingSlots[slotNum], kvp.Key, kvp.Value);
+					SetAPSellSlot(inv.SellingSlots[slotNum], kvp.Key, kvp.Value, prices);
 				}
 			}
 
@@ -352,11 +363,10 @@ namespace Multiworld
 
 	}
 
-	public void SetAPSellSlot(ItemSlotTrade slot, string location, Dictionary<string, string> itemDict)
-        { //Replace a Trader slot with a foreign AP item placeholder
+	public void SetAPSellSlot(ItemSlotTrade slot, string location, Dictionary<string, string> itemDict, int prices){ //Replace a Trader slot with a foreign AP item placeholder
 
-		string title = itemDict["ItemDisplayName"] + " for " + itemDict["APOwnerName"];
-		int price = 25;
+        string title = itemDict["ItemDisplayName"] + " for " + itemDict["APOwnerName"];
+		int price = prices;
 		string code = "game:book-normal-brickred";
 		switch(itemDict["Classification"])
 		{
@@ -406,6 +416,7 @@ namespace Multiworld
 	}
     public void OnLeaveWorld()
     {
+			
     }
 
     }
