@@ -673,3 +673,6 @@ fabric.properties
 # Additional files built by Visual Studio
 
 # End of https://www.toptal.com/developers/gitignore/api/csharp,visualstudio,visualstudiocode,rider
+multiworld/code runs/Chapter 1.json
+multiworld/code runs/Chapter 2.json
+multiworld/lore_codes.json
