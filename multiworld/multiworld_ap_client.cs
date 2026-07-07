@@ -75,7 +75,7 @@ namespace Multiworld
             		if(config == null)
             		{
                 		config = new ClientConfig();
-				config.VSName = capi.World.Player.PlayerName;
+						config.VSName = capi.World.Player.PlayerName;
                 		capi.StoreModConfig(config, "multiworld_config.json");
            		 }
 		}
