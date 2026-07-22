@@ -9,6 +9,8 @@ stone_age_list = [
         "Achievement: Stone Age",
         "Achievement: Cook a Meal",
         "Achievement: Farming",
+        "Achievement: Going Fishing",
+        "Achievement: Got Fish",
        # "Achievement: Casting", #couldn't find a method to detect casting
         "Achievement: Charcoal",
         "Achievement: Defeat a Bear",
@@ -28,12 +30,16 @@ copper_age_list = [
         ]
 bronze_age_list = [
         "Achievement: Bronze Age",
-        "Achievement: Against the Storm"
+        "Achievement: Against the Storm",
+        "Achievement: Mechanized Menace",
         ]
 
 iron_age_list = [
         "Achievement: Iron Age",
         "Achievement: Automation",
+        "Achievement: Bird Down",
+        "Achievement: Lens Got",
+        "Achievement: Tobias' Objective" #current end of the story
         "Achievement: Steel Age" #steel anvil isn't real, So we detect a steel ingot instead
         ]
 
@@ -41,6 +47,110 @@ filler_list = [
 
        # "Chest", #probably don't even want these
        # "Vessel" #give this 4 or 5 slots marked as filler and reuse
+        ]
+
+lore_list = [
+        "lore-1",
+        "lore-2",
+        "lore-3",
+        "lore-4",
+        "lore-5",
+        "lore-6",
+        "lore-7",
+        "lore-8",
+        "lore-9",
+        "lore-10",
+        "lore-11",
+        "lore-12",
+        "lore-13",
+        "lore-14",
+        "lore-15",
+        "lore-16",
+        "lore-17",
+        "lore-18",
+        "lore-19",
+        "lore-20",
+        "lore-21",
+        "lore-22",
+        "lore-23",
+        "lore-24",
+        "lore-25",
+        "lore-26",
+        "lore-27",
+        "lore-28",
+        "lore-29",
+        "lore-30",
+        "lore-31",
+        "lore-32",
+        "lore-33",
+        "lore-34",
+        "lore-35",
+        "lore-36",
+        "lore-37",
+        "lore-38",
+        "lore-39",
+        "lore-40",
+        "lore-41",
+        "lore-42",
+        "lore-43",
+        "lore-44",
+        "lore-45",
+        "lore-46",
+        "lore-47",
+        "lore-48",
+        "lore-49",
+        "lore-50",
+        "lore-51",
+        "lore-52",
+        "lore-53",
+        "lore-54",
+        "lore-55",
+        "lore-56",
+        "lore-57",
+        "lore-58",
+        "lore-59",
+        "lore-60",
+        "lore-61",
+        "lore-62",
+        "lore-63",
+        "lore-64",
+        "lore-65",
+        "lore-66",
+        "lore-67",
+        "lore-68",
+        "lore-69",
+        "lore-70",
+        "lore-71",
+        "lore-72",
+        "lore-73",
+        "lore-74",
+        "lore-75",
+        "lore-76",
+        "lore-77",
+        "lore-78",
+        "lore-79",
+        "lore-80",
+        "lore-81",
+        "lore-82",
+        "lore-83",
+        "lore-84",
+        "lore-85",
+        "lore-86",
+        "lore-87",
+        "lore-88",
+        "lore-89",
+        "lore-90",
+        "lore-91",
+        "lore-92",
+        "lore-93",
+        "lore-94",
+        "lore-95",
+        "lore-96",
+        "lore-97",
+        "lore-98",
+        "lore-99",
+        "lore-100",
+        "lore-101",
         ]
 
 traders_base = [
@@ -61,7 +171,7 @@ for name in traders_base:
     for i in range(1, 17):
         traders_list.append(f"{name} {i}")
 
-location_list = stone_age_list + copper_age_list + bronze_age_list + iron_age_list + traders_list
+location_list = lore_list + stone_age_list + copper_age_list + bronze_age_list + iron_age_list + traders_list
 
 LOCATION_NAME_TO_ID = {name: i+1 for i, name in enumerate(location_list)}
 
@@ -93,6 +203,8 @@ def create_regular_locations(world: VintageWorld) -> None:
     copper_age.add_locations(copper_age_locations, VintageLocation)
     bronze_age_locations = get_location_names_with_ids(bronze_age_list)
     bronze_age.add_locations(bronze_age_locations, VintageLocation)
+    lore_locations = get_location_names_with_ids(lore_list)
+    bronze_age.add_locations (lore_locations, VintageLocation)
     iron_age_locations = get_location_names_with_ids(iron_age_list)
     iron_age.add_locations(iron_age_locations, VintageLocation)
 

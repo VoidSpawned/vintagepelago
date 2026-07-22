@@ -20,30 +20,45 @@ progression_list = {
         "Barrel",
         "Quern",
         "Crucible",
-        "Hunter Backpack",
         #Copper Age
         "Copper Pickaxe",
         "Copper Saw",
         "Copper Hammer",
         "Chest",
-        "Linen Sack",
         #Bronze
         "Black Bronze Pickaxe",
+        "Map to Archives", #locatormap-resonancearchive
+        "Tamed Elk",
         #Iron
         "Iron Pickaxe",
         "Steel Pickaxe",
         "Forlorn Hope Estoc", #blade-forlorn-iron
+        "Map to Lazaret", #letter-lazaret
+        "Map to Devastation", #locatormap-devastationarea
+        "Map to Tobias cave", #locatormap-cavetobias
         }
 
 useful_list = {
         #Stone Age
-        #Copper Age,
+        "Hunter Backpack",
+        #Copper Age
+        "Linen Sack",
         #Iron Age
+        "leather Backpack",
         #Any
         "Bucket",
         "Copper Shears", #shears-copper
         "Copper Scythe", #scythe-copper
-        #Tamed Elk
+        #Traders
+        "Agriculture Trader Item",
+        "Artisan Trader Item",
+        "Building Trader Item",
+        "Clothing Trader Item",
+        "Commodities Trader Item",
+        "Furniture Trader Item",
+        "Luxuries Trader Item",
+        "Survival Trader Item",
+        "Treasure Trader Item",
         }
 
 filler_list = {

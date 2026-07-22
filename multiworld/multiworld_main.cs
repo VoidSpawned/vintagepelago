@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 //
 using Vintagestory.API.Client;
@@ -46,6 +47,7 @@ namespace Multiworld
 			{"claypot-black-fired","Stone Age"},
 			{"claypot-brown-fired","Stone Age"},
 			{"claypot-cream-fired","Stone Age"},
+            {"claypot-earthyorange-fired","Stone Age"},
 			{"claypot-gray-fired","Stone Age"},
 			{"claypot-orange-fired","Stone Age"},
 			{"claypot-red-fired","Stone Age"},
@@ -55,6 +57,7 @@ namespace Multiworld
 			{"bowl-black-meal","Cook a Meal"},
 			{"bowl-brown-meal","Cook a Meal"},
 			{"bowl-cream-meal","Cook a Meal"},
+            {"bowl-earthyorange-meal","Cook a Meal"},
 			{"bowl-gray-meal","Cook a Meal"},
 			{"bowl-orange-meal","Cook a Meal"},
 			{"bowl-red-meal","Cook a Meal"},
@@ -64,6 +67,7 @@ namespace Multiworld
 			{"wateringcan-black-fired","Farming"},
 			{"wateringcan-brown-fired","Farming"},
 			{"wateringcan-cream-fired","Farming"},
+            {"wateringcan-earthyorange-fired","Farming"},
 			{"wateringcan-gray-fired","Farming"},
 			{"wateringcan-orange-fired","Farming"},
 			{"wateringcan-red-fired","Farming"},
@@ -72,9 +76,93 @@ namespace Multiworld
 		//	{"","Casting"},		//no good method for detecing the pour
 			{"pie-perfect","Pie"},
 			{"lantern-up","Lanterns"},
-			{"windmillrotor-north","Automation"},
-			{"inkandquill", "Write a Book"},
-			{"ingot-steel","Steel Age"} //placeholder win condition
+			{"windmillrotor-wood-north","Automation"},
+            {"windmillrotor-metal-north","Automation"},
+            {"inkandquill", "Write a Book"},
+			{"fishingpole-simple-wood" , "Going Fishing"},
+            {"fishingpole-simple-bamboo" , "Going Fishing"},
+            {"fishraw-reef-clown-common-adult" , "Got Fish"},
+            {"fishraw-saltwater-haddock-common-adult" , "Got Fish"},
+            {"fishraw-freshwater-carp-common-adult" , "Got Fish"},
+            {"fishraw-freshwater-walleye-common-adult" , "Got Fish"},
+            {"fishraw-saltwater-mahi-mahi-common-adult" , "Got Fish"},
+            {"fishraw-saltwater-coelacanth-common-adult" , "Got Fish"},
+            {"fishraw-reef-tang-banded-adult" , "Got Fish"},
+            {"fishraw-reef-angel-bicolor-adult" , "Got Fish"},
+            {"fishraw-reef-clown-black-adult" , "Got Fish"},
+            {"fishraw-freshwater-crappie-black-adult" , "Got Fish"},
+            {"fishraw-freshwater-piranha-black-adult" , "Got Fish"},
+            {"fishraw-saltwater-grouper-black-adult" , "Got Fish"},
+            {"fishraw-freshwater-sheatfish-black-adult" , "Got Fish"},
+            {"fishraw-reef-butterfly-blackwedged-adult" , "Got Fish"},
+            {"fishraw-reef-butterfly-copperband-adult" , "Got Fish"},
+            {"fishraw-reef-wrasse-creole-adult" , "Got Fish"},
+            {"fishraw-reef-puffer-longspine-adult" , "Got Fish"},
+            {"fishraw-reef-tang-powderblue-adult" , "Got Fish"},
+            {"fishraw-reef-trigger-titan-adult" , "Got Fish"},
+            {"fishraw-reef-clown-yellowstripe-adult" , "Got Fish"},
+            {"fishraw-saltwater-pollock-alaska-adult" , "Got Fish"},
+            {"fishraw-saltwater-herring-atlantic-adult" , "Got Fish"},
+            {"fishraw-saltwater-mackerel-atlantic-adult" , "Got Fish"},
+            {"fishraw-saltwater-wreckfish-atlantic-adult" , "Got Fish"},
+            {"fishraw-saltwater-sturgeon-atlantic-adult" , "Got Fish"},
+            {"fishraw-saltwater-gurnard-cape-adult" , "Got Fish"},
+            {"fishraw-saltwater-perch-pacific-adult" , "Got Fish"},
+            {"fishraw-saltwater-bream-sea-adult" , "Got Fish"},
+            {"fishraw-saltwater-hake-silver-adult" , "Got Fish"},
+            {"fishraw-freshwater-trout-brown-adult" , "Got Fish"},
+            {"fishraw-freshwater-perch-european-adult" , "Got Fish"},
+            {"fishraw-freshwater-trout-rainbow-adult" , "Got Fish"},
+			{"fishraw-freshwater-chub-river-adult" , "Got Fish"},
+			{"fishraw-freshwater-alewife-shad-adult" , "Got Fish"},
+			{"fishraw-freshwater-crappie-white-adult" , "Got Fish"},
+			{"fishraw-freshwater-sheatfish-white-adult" , "Got Fish"},
+			{"fishraw-freshwater-perch-yellow-adult" , "Got Fish"},
+			{"fishraw-saltwater-wolf-bering-adult" , "Got Fish"},
+			{"fishraw-saltwater-barracuda-great-adult" , "Got Fish"},
+			{"fishraw-saltwater-salmon-pink-adult" , "Got Fish"},
+			{"fishraw-freshwater-piranha-red-adult" , "Got Fish"},
+			{"fishraw-saltwater-snapper-red-adult" , "Got Fish"},
+			{"fishraw-freshwater-tilapia-red-adult" , "Got Fish"},
+			{"fishraw-saltwater-tuna-skipjack-adult" , "Got Fish"},
+			{"fishraw-freshwater-catfish-blue-adult" , "Got Fish"},
+			{"fishraw-freshwater-pickerel-chain-adult" , "Got Fish"},
+			{"fishraw-freshwater-catfish-channel-adult" , "Got Fish"},
+			{"fishraw-freshwater-salmon-coho-adult" , "Got Fish"},
+			{"fishraw-freshwater-carp-grass-adult" , "Got Fish"},
+			{"fishraw-freshwater-bass-largemouth-adult" , "Got Fish"},
+			{"fishraw-freshwater-tilapia-nile-adult" , "Got Fish"},
+			{"fishraw-freshwater-bass-smallmouth-adult" , "Got Fish"},
+			{"fishraw-saltwater-amberjack-yellowtail-adult" , "Got Fish"},
+			{"fishraw-freshwater-pike-northern-adult" , "Got Fish"},
+			{"fishraw-freshwater-arapaima-arapaima-adult" , "Got Fish"},
+			{"fishraw-freshwater-arapaima-gigas-adult" , "Got Fish"},
+			{"fishraw-freshwater-carp-common-juvenile" , "Got Fish"},
+			{"fishraw-freshwater-walleye-common-juvenile" , "Got Fish"},
+			{"fishraw-saltwater-mahi-mahi-common-juvenile" , "Got Fish"},
+			{"fishraw-saltwater-coelacanth-common-juvenile" , "Got Fish"},
+			{"fishraw-saltwater-grouper-black-juvenile" , "Got Fish"},
+			{"fishraw-freshwater-sheatfish-black-juvenile" , "Got Fish"},
+			{"fishraw-saltwater-wreckfish-atlantic-juvenile" , "Got Fish"},
+			{"fishraw-saltwater-sturgeon-atlantic-juvenile" , "Got Fish"},
+			{"fishraw-freshwater-sheatfish-white-juvenile" , "Got Fish"},
+			{"fishraw-saltwater-wolf-bering-juvenile" , "Got Fish"},
+			{"fishraw-saltwater-barracuda-great-juvenile" , "Got Fish"},
+			{"fishraw-saltwater-salmon-pink-juvenile" , "Got Fish"},
+			{"fishraw-saltwater-snapper-red-juvenile" , "Got Fish"},
+			{"fishraw-saltwater-tuna-skipjack-juvenile" , "Got Fish"},
+			{"fishraw-freshwater-catfish-blue-juvenile" , "Got Fish"},
+			{"fishraw-freshwater-pickerel-chain-juvenile" , "Got Fish"},
+			{"fishraw-freshwater-catfish-channel-juvenile" , "Got Fish"},
+			{"fishraw-freshwater-salmon-coho-juvenile" , "Got Fish"},
+			{"fishraw-freshwater-carp-grass-juvenile" , "Got Fish"},
+			{"fishraw-freshwater-bass-largemouth-juvenile" , "Got Fish"},
+			{"fishraw-freshwater-bass-smallmouth-juvenile" , "Got Fish"},
+			{"fishraw-saltwater-amberjack-yellowtail-juvenile" , "Got Fish"},
+			{"fishraw-freshwater-pike-northern-juvenile" , "Got Fish"},
+			{"fishraw-freshwater-arapaima-arapaima-juvenile" , "Got Fish"},
+			{"fishraw-freshwater-arapaima-gigas-juvenile" , "Got Fish"},
+            {"ingot-steel","Steel Age"} //placeholder win condition
 		};
 
 		public Dictionary<string, string> KillAchievements = new Dictionary<string, string>
@@ -304,17 +392,26 @@ namespace Multiworld
 		}
 
 		public void OnPlayerDiscovery(object sender, string discoverycode, string text)
-		{
-			//Console.WriteLine();
-		}
+		{   //When a player gets a lore discovery doesn't matter which send a check
+			JsonObject APConfig = sapi.LoadModConfig("multiworld_config.json");
+            Dictionary<string, Dictionary<string, string>> loc_list = sapi.LoadModConfig<Dictionary<string, Dictionary<string, string>>>(APConfig["VSName"] + "_spoilers.json");
+			if (loc_list.Keys.Contains("lore-"))
+			{
+				Console.WriteLine("Did I even get here");	
+			}
+
+        }
 
 		public void OnPlayerInteractEntity(Entity entity, IPlayer byPlayer, ItemSlot slot, Vec3d hitPosition, int mode, ref EnumHandling handling)
 		{	//When a player interacts with a Trader, replace their selling slots with the player's foreign AP item list
 			if(entity is EntityTrader trader)
 			{
 				Dictionary<string, Dictionary<string, string>> spoilers = sapi.LoadModConfig<Dictionary<string, Dictionary<string, string>>>(byPlayer.PlayerName+"_spoilers.json");
+				JsonObject APConfig = sapi.LoadModConfig("multiworld_config.json");
 
-					int prices = 10;
+				int defaultPrice = 10;
+				int prices = APConfig["traderPrices"].AsInt(defaultPrice);
+
 				var inv = trader.Inventory as InventoryTrader;
 
 				foreach(var kvp in spoilers)
@@ -322,32 +419,77 @@ namespace Multiworld
 					string match = "";
 					switch(trader.Code.ToString().Split(':')[1])
 					{
-						case "humanoid-trader-foods":
-							match = "Agriculture";
+						case "trader-male-agriculture-cold":
+						case "trader-female-agriculture-cold":
+                        case "trader-male-agriculture-temperate":
+                        case "trader-female-agriculture-temperate":
+                        case "trader-male-agriculture-desert":
+                        case "trader-female-agriculture-desert":
+                            match = "Agriculture";
 							break;
-						case "humanoid-trader-artisan":
-							match = "Artisan";
+                        case "trader-male-artisan-cold":
+                        case "trader-female-artisan-cold":
+                        case "trader-male-artisan-temperate":
+                        case "trader-female-artisan-temperate":
+                        case "trader-male-artisan-desert":
+                        case "trader-female-artisan-desert":
+                            match = "Artisan";
 							break;
-						case "humanoid-trader-buildmaterials":
-							match = "Building";
+                        case "trader-male-buildmaterials-cold":
+                        case "trader-female-buildmaterials-cold":
+                        case "trader-male-buildmaterials-temperate":
+                        case "trader-female-buildmaterials-temperate":
+                        case "trader-male-buildmaterials-desert":
+                        case "trader-female-buildmaterials-desert":
+                            match = "Building";
 							break;
-						case "humanoid-trader-clothing":
-							match = "Clothing";
+                        case "trader-male-clothing-cold":
+                        case "trader-female-clothing-cold":
+                        case "trader-male-clothing-temperate":
+                        case "trader-female-clothing-temperate":
+                        case "trader-male-clothing-desert":
+                        case "trader-female-clothing-desert":
+                            match = "Clothing";
 							break;
-						case "humanoid-trader-commodities":
-							match = "Commodities";
+                        case "trader-male-commodities-cold":
+                        case "trader-female-commodities-cold":
+                        case "trader-male-commodities-temperate":
+                        case "trader-female-commodities-temperate":
+                        case "trader-male-commodities-desert":
+                        case "trader-female-commodities-desert":
+                            match = "Commodities";
 							break;
-						case "humanoid-trader-furniture":
-							match = "Furniture";
+                        case "trader-male-furniture-cold":
+                        case "trader-female-furniture-cold":
+                        case "trader-male-furniture-temperate":
+                        case "trader-female-furniture-temperate":
+                        case "trader-male-furniture-desert":
+                        case "trader-female-furniture-desert":
+                            match = "Furniture";
 							break;
-						case "humanoid-trader-luxuries":
-							match = "Luxuries";
+                        case "trader-male-luxuries-cold":
+                        case "trader-female-luxuries-cold":
+                        case "trader-male-luxuries-temperate":
+                        case "trader-female-luxuries-temperate":
+                        case "trader-male-luxuries-desert":
+                        case "trader-female-luxuries-desert":
+                            match = "Luxuries";
 							break;
-						case "humanoid-trader-survivalgoods":
-							match = "Survival";
+                        case "trader-male-survivalgoods-cold":
+                        case "trader-female-survivalgoods-cold":
+                        case "trader-male-survivalgoods-temperate":
+                        case "trader-female-survivalgoods-temperate":
+                        case "trader-male-survivalgoods-desert":
+                        case "trader-female-survivalgoods-desert":
+                            match = "Survival";
 							break;
-						case "humanoid-trader-treasurehunter":
-							match = "Treasure";
+                        case "trader-male-treasurehunter-cold":
+                        case "trader-female-treasurehunter-cold":
+                        case "trader-male-treasurehunter-temperate":
+                        case "trader-female-treasurehunter-temperate":
+                        case "trader-male-treasurehunter-desert":
+                        case "trader-female-treasurehunter-desert":
+                            match = "Treasure";
 							break;
 					}
 					if(match == "")
@@ -374,28 +516,23 @@ namespace Multiworld
 		public void SetAPSellSlot(ItemSlotTrade slot, string location, Dictionary<string, string> itemDict, int prices){ //Replace a Trader slot with a foreign AP item placeholder
 
 			string title = itemDict["ItemDisplayName"] + " for " + itemDict["APOwnerName"];
-			int price = prices;
 			string code = "game:book-normal-brickred";
 			switch(itemDict["Classification"])
 			{
 				case "Progression":
 					title = "Progressive "+ title;
-					price = 100;
 					code = "game:book-normal-purple";
 					break;
 				case "Useful":
 					title = "Useful "+ title;
-					price = 50;
 					code = "game:book-normal-purpleorange";
 					break;
 				case "Filler":
 					title = "Filler "+ title;
-					price = 25;
 					code = "game:book-normal-orangebrown";
 					break;
 				case "Trap":
 					title = "Trap "+ title;
-					price = 5;
 					code = "game:book-normal-gray";
 					break;
 			}
@@ -407,7 +544,7 @@ namespace Multiworld
 				stack.Attributes["location"] = new StringAttribute(location);
 				var resolved = new ResolvedTradeItem();
 				resolved.Stack = stack.Clone();
-				resolved.Price = price;
+				resolved.Price = prices;
 				resolved.Stock = 1;
 				resolved.Restock = new RestockOpts();
 				resolved.SupplyDemand = new SupplyDemandOpts();

@@ -8,6 +8,7 @@ using Vintagestory.API.Config;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.GameContent;
 using Vintagestory.Client.NoObf;
+using Vintagestory.Server;
 
 //this file houses utils for managing communication between VS server and client, such as protobuf packets and text commands
 namespace Multiworld
@@ -35,7 +36,7 @@ namespace Multiworld
 	public class Infranet
 	{
 		IServerNetworkChannel serverChannel;
-		IClientNetworkChannel clientChannel;
+        IClientNetworkChannel clientChannel;
 
 		ICoreServerAPI sapi;
 		ICoreClientAPI capi;
@@ -44,8 +45,8 @@ namespace Multiworld
 		
 		public void init_server(ICoreServerAPI api)
 		{
-			sapi = api;	
-			serverChannel = 
+			sapi = api;
+            serverChannel = 
 				api.Network.RegisterChannel("ap_notification")
 			    .RegisterMessageType(typeof(APNotification))
 			    .RegisterMessageType(typeof(ClientAPScoutPacket))
@@ -160,7 +161,7 @@ namespace Multiworld
 
 		private void OnClientAPItemReceivePacket(IPlayer fromPlayer, ClientAPItemReceivePacket packet)
 		{ //give the player items listed without question
-			string player = packet.Player;
+            string player = packet.Player;
 			List<string> items = new List<string>(packet.Items);
 			IPlayerInventoryManager inv = fromPlayer.InventoryManager;
 			for(int i = 0; i < items.Count;i++)

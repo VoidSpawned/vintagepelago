@@ -13,10 +13,11 @@ if TYPE_CHECKING:
 
 
 def set_all_rules(world: VintageWorld) -> None:
+    filledlore = 0
     set_all_entrance_rules(world)
     set_all_location_rules(world)
     set_completion_condition(world)
-    set_all_item_rules(world)
+    set_all_item_rules(world, filledlore)
 
 def set_all_entrance_rules(world: VintageWorld) -> None:
     #filler_to_stone = world.get_entrance("Filler to Stone")
@@ -42,10 +43,18 @@ def set_all_location_rules(world: VintageWorld) -> None:
 def set_completion_condition(world: VintageWorld) -> None:
     world.multiworld.completion_condition[world.player] = lambda state: state.has("Victory", world.player)
 
-def set_all_item_rules(world: VintageWorld) -> None:
-    block_progression_items(world)
+def set_all_item_rules(world: VintageWorld, filledlore) -> None:
+    block_progression_items(world, filledlore)
 
-def block_progression_items(world:VintageWorld) -> None:
+def block_progression_items(world:VintageWorld, filledlore) -> None:
     for location in world.location_names: 
-        if not "Achievement" in location: #achievements should always progress
+        if world.options.lore_progression >= filledlore and "lore" in location: #We won't add any progression items past the Lorehunter option value
+            if int(location.split("-")[1]) <= world.options.lore_progression:
+                filledlore += 1
+                continue
+            else:
+                add_item_rule(world.multiworld.get_location(location, world.player), lambda item: ItemClassification.progression not in item.classification)
+        elif world.options.trader_progression and "trader" in location:
+            continue
+        elif not "Achievement" in location: #Achievements should always progress
             add_item_rule(world.multiworld.get_location(location, world.player), lambda item: ItemClassification.progression not in item.classification)

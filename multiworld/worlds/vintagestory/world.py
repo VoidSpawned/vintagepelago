@@ -1,6 +1,7 @@
 from collections.abc import Mapping
 from typing import Any
 from worlds.AutoWorld import World
+from . import options as VintageOptions
 from . import items, locations, options, regions, rules, web_world
 
 class VintageWorld(World):
@@ -35,4 +36,4 @@ class VintageWorld(World):
         return items.get_random_filler_item_name(self)
 
     def fill_slot_data(self) -> Mapping[str, Any]:
-        return self.options.as_dict("casual", "steel", "prices")#, "temporal_chance", "trader_progression")
+        return self.options.as_dict("casual", "steel", "prices", "Lorehunter")#, "temporal_chance", "trader_progression")
