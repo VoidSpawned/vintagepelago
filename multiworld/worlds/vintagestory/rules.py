@@ -1,5 +1,6 @@
 from __future__ import annotations
 from BaseClasses import CollectionState, ItemClassification
+from . import items
 from worlds.generic.Rules import add_rule, set_rule, add_item_rule
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -7,7 +8,7 @@ if TYPE_CHECKING:
 
 """
     The general idea is that anvils represent progression through the ages.
-    The goal is to get the steel anvil.
+    The goal is to get the steel anvil or complete story.
     As such, we will not send any anvils and we'll gate tools behind ages.
 """
 
@@ -24,11 +25,17 @@ def set_all_entrance_rules(world: VintageWorld) -> None:
     stone_to_copper = world.get_entrance("Stone to Copper")
     copper_to_bronze = world.get_entrance("Copper to Bronze")
     bronze_to_iron = world.get_entrance("Bronze to Iron")
+    iron_to_story_first = world.get_entrance("Iron to Story1")
+    story_first_to_story_second = world.get_entrance("Story1 to Story2")
     #iron_to_steel = world.get_entrance("Iron to Steel")
 
     set_rule(stone_to_copper, lambda state: state.has("Crucible", world.player))
 
     set_rule(copper_to_bronze, lambda state: state.has_any(["Ore Bomb", "Prospecting Pick", "Black Bronze Pickaxe", "Iron Pickaxe", "Steel Pickaxe"], world.player))
+
+    set_rule(iron_to_story_first, lambda state: state.has("Map to Archives", world.player))
+
+    set_rule(story_first_to_story_second, lambda state: state.has_all(["Map to Lazaret", "Map to Devastation", "Map to Tobias cave", "Tamed Elk"], world.player))
     
     set_rule(bronze_to_iron, lambda state: state.has_any(["Iron Pickaxe", "Steel Pickaxe"], world.player)
              and state.has("Quern", world.player))
@@ -54,7 +61,15 @@ def block_progression_items(world:VintageWorld, filledlore) -> None:
                 continue
             else:
                 add_item_rule(world.multiworld.get_location(location, world.player), lambda item: ItemClassification.progression not in item.classification)
-        elif world.options.trader_progression and "trader" in location:
+        elif world.options.trader_progression and "Trader" in location:
             continue
+        elif world.options.cropsplus and "Hot Crop" in location:
+            continue
+        elif world.options.victory <= 1 and ("Mechanical" in location or "Schematics" in location or "Lens" in location):
+            add_item_rule(world.multiworld.get_location(location, world.player), lambda item: ItemClassification.progression not in item.classification)
+        elif world.options.victory == 2 and "Lens" in location:
+            add_item_rule(world.multiworld.get_location(location, world.player), lambda item: ItemClassification.progression not in item.classification)
+        elif world.options.victory == 3 and "Delivered" in location:
+            add_item_rule(world.multiworld.get_location(location, world.player), lambda item: ItemClassification.progression not in item.classification)
         elif not "Achievement" in location: #Achievements should always progress
             add_item_rule(world.multiworld.get_location(location, world.player), lambda item: ItemClassification.progression not in item.classification)

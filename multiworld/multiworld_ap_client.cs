@@ -27,7 +27,7 @@ namespace Multiworld
 		public int APPort = 38281;
 		public string VSName = "";
 		public string Password = "";
-		public string win_condition = "Iron";
+		public string win_condition = "Iron Age";
 		public int traderPrices = 10;
 		public int APReceivedIndex = 0;
 		public Dictionary<string, Dictionary<string, string>> APData;
@@ -72,12 +72,12 @@ namespace Multiworld
 		public void LoadClientConfig()
 		{
 			config = capi.LoadModConfig<ClientConfig>("multiworld_config.json");
-            		if(config == null)
-            		{
-                		config = new ClientConfig();
-						config.VSName = capi.World.Player.PlayerName;
-                		capi.StoreModConfig(config, "multiworld_config.json");
-           		 }
+            if(config == null)
+            {
+                config = new ClientConfig();
+				config.VSName = capi.World.Player.PlayerName;
+                capi.StoreModConfig(config, "multiworld_config.json");
+           	}
 		}
 
 		public void ConnectSignals()
@@ -140,6 +140,9 @@ namespace Multiworld
 				final_dict[session.Locations.GetLocationNameFromId(kvp.Key)] = vitem;
 				//Console.WriteLine($"[Scouted] {session.Locations.GetLocationNameFromId(kvp.Key)}: {vitem["ItemDisplayName"]}");
 				config.APData = final_dict;
+				if (kvp.Value.ItemDisplayName == "Victory"){
+					config.win_condition = kvp.Value.LocationName;
+				}
 				capi.StoreModConfig(config, "multiworld_config.json");
 			}
 			return final_dict;
@@ -147,7 +150,7 @@ namespace Multiworld
 
 		public void OnItemReceived( ReceivedItemsHelper receivedItemsHelper )
 	        {
-		//	Console.WriteLine(session.Items.PeekItem().ItemDisplayName + " incoming");
+			//Console.WriteLine(session.Items.PeekItem().ItemDisplayName + " incoming");
 			ProcessAPItemQueue();	
 	        }
 
@@ -156,11 +159,11 @@ namespace Multiworld
 			//Console.WriteLine($"Items {config.APReceivedIndex} / {session.Items.Index}");
 			while(config.APReceivedIndex < session.Items.Index)
 			{
-		  		  ap_items_to_receive.Add(ResolveItemCode(session.Items.PeekItem().ItemDisplayName));
-		  		  config.APReceivedIndex++;
+		  		ap_items_to_receive.Add(ResolveItemCode(session.Items.PeekItem().ItemDisplayName));
+				config.APReceivedIndex++;
 			}
-	          		  capi.StoreModConfig(config, "multiworld_config.json");
-	          		  session.Items.DequeueItem();
+			capi.StoreModConfig(config, "multiworld_config.json");
+			session.Items.DequeueItem();
 
 		}
 
@@ -198,7 +201,7 @@ namespace Multiworld
 			}
 			else if(APItemToLocal.quantity.Keys.Contains(displayName))
 			{
-				int rand = capi.World.Rand.Next(1,25);
+				int rand = capi.World.Rand.Next(5,25);
 				code = "quantity:game:"+APItemToLocal.quantity[displayName]+":"+rand.ToString();
 			}
 			if(code == displayName)
@@ -244,7 +247,7 @@ namespace Multiworld
 			{"Alchemist Hat", "clothes-head-alchemist"},
 			{"Fortune Teller Scarf", "clothes-head-fortune-tellers-scarf"},
 			{"leather Backpack", "backpack-normal"},
-			{"Tamed Elk", "creature-tameddeer-"},
+			{"Tamed Elk", "creature-tameddeer-"}, //We later attribute the gender and albino-ness of the deer
 			{"Agriculture Trader Item", "creature-trader-male-agriculture-temperate"},
             {"Artisan Trader Item", "creature-trader-male-artisan-temperate"},
 			{"Building Trader Item", "creature-trader-male-buildmaterials-temperate"},
@@ -254,7 +257,7 @@ namespace Multiworld
 			{"Luxuries Trader Item", "creature-trader-male-luxuries-temperate"},
 			{"Survival Trader Item", "creature-trader-male-survivalgoods-temperate"},
 			{"Treasure Trader Item", "creature-trader-male-treasurehunter-temperate"},
-            { "Map to Archives", "locatormap-resonancearchive"},
+            {"Map to Archives", "locatormap-resonancearchive"},
 			{"Map to Lazaret", "letter-lazaret"},
 			{"Map to Devastation", "locatormap-devastationarea"},
 	        {"Map to Tobias cave", "locatormap-cavetobias"},
@@ -282,9 +285,12 @@ namespace Multiworld
 			{"Blue Clay", "clay-blue"},
 			{"Red Clay", "clay-red"},
 			{"Lime", "lime"},
-			{"Coal", "coal"},
+			{"Coal", "ore-bituminouscoal"},
 			{"Flax Twine", "flaxtwine"},
 			{"Rusty Gear", "gear-rusty"},
+			{"Borax", "ore-borax"},
+			{"Olivine", "ore-olivine"},
+			{"Bauxite Stones", "stone-bauxite"},
 		
 		};
     }
@@ -298,18 +304,15 @@ namespace Multiworld
 				case RoomInfoPacket roomPacket:
 					break;
 				case ConnectedPacket connPacket:
-					bool steel = (connPacket.SlotData["victoryondition"].ToString() == "1");
-					if (steel == true)
-						config.win_condition = "Steel";
 					config.traderPrices = connPacket.SlotData["prices"].ToString().ToInt();
 					capi.ShowChatMessage("Connected to Archipelago Server");
 					break;
-			//	case ReceivedItemsPacket itemPacket:
-			//		foreach(NetworkItem item in itemPacket.Items)
-			//		{
-			//			Console.WriteLine($"[ItemPacket] ItemID={item.Item}");
-			//		}
-			//		break;
+				//case ReceivedItemsPacket itemPacket:
+				//	foreach (NetworkItem item in itemPacket.Items)
+				//	{
+				//		Console.WriteLine($"[ItemPacket] ItemID={item.Item}");
+				//	}
+				//	break;
 				default:
 					break;
 			}

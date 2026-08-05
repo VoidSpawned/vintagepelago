@@ -14,90 +14,117 @@ DEFAULT_ITEM_CLASSIFICATIONS = {}
 ##TODO: Add Traps 
 
 progression_list = {
-        #Stone Age
-        "Cookpot",
-        "Bowl",
-        "Barrel",
-        "Quern",
-        "Crucible",
-        #Copper Age
-        "Copper Pickaxe",
-        "Copper Saw",
-        "Copper Hammer",
-        "Chest",
-        #Bronze
-        "Black Bronze Pickaxe",
-        "Map to Archives", #locatormap-resonancearchive
-        "Tamed Elk",
-        #Iron
-        "Iron Pickaxe",
-        "Steel Pickaxe",
-        "Forlorn Hope Estoc", #blade-forlorn-iron
-        "Map to Lazaret", #letter-lazaret
-        "Map to Devastation", #locatormap-devastationarea
-        "Map to Tobias cave", #locatormap-cavetobias
-        }
+    #Stone Age
+    "Cookpot",
+    "Bowl",
+    "Barrel",
+    "Quern",
+    "Crucible",
+    #Copper Age
+    "Copper Pickaxe",
+    "Copper Saw",
+    "Copper Hammer",
+    "Chest",
+    #Bronze
+    "Black Bronze Pickaxe",
+    "Map to Archives", #locatormap-resonancearchive
+    "Tamed Elk",
+    "Borax",
+    #Iron
+    "Iron Pickaxe",
+    "Steel Pickaxe",
+    "Bauxite Stones",
+    "Forlorn Hope Estoc", #blade-forlorn-iron
+    "Map to Lazaret", #letter-lazaret
+    "Map to Devastation", #locatormap-devastationarea
+    "Map to Tobias cave", #locatormap-cavetobias
+    }
 
 useful_list = {
-        #Stone Age
-        "Hunter Backpack",
-        #Copper Age
-        "Linen Sack",
-        #Iron Age
-        "leather Backpack",
-        #Any
-        "Bucket",
-        "Copper Shears", #shears-copper
-        "Copper Scythe", #scythe-copper
-        #Traders
-        "Agriculture Trader Item",
-        "Artisan Trader Item",
-        "Building Trader Item",
-        "Clothing Trader Item",
-        "Commodities Trader Item",
-        "Furniture Trader Item",
-        "Luxuries Trader Item",
-        "Survival Trader Item",
-        "Treasure Trader Item",
-        }
+    #Stone Age
+    "Hunter Backpack",
+    #Copper Age
+    "Linen Sack",
+    #Iron Age
+    "leather Backpack",
+    #Any
+    "Bucket",
+    "Copper Shears", #shears-copper
+    "Copper Scythe", #scythe-copper
+    #Traders
+    "Agriculture Trader Item",
+    "Artisan Trader Item",
+    "Building Trader Item",
+    "Clothing Trader Item",
+    "Commodities Trader Item",
+    "Furniture Trader Item",
+    "Luxuries Trader Item",
+    "Survival Trader Item",
+    "Treasure Trader Item",
+    }
 
 filler_list = {
-        "Prospecting Pick",
-        "Fire Clay", 
-        "Storage Vessel",
-        "Crock",
-        "Blue Clay",
-        "Red Clay",
-        "Copper Chisel",
-        "Lime",
-        "Flax Seeds",
-        "Coal",
-       # "Pie", no attributed items yet
-        "Temporal Gear",
-        "Rusty Gear",
-        "Ore Bomb",
-        "Candle", #candle
-        "Copper Ingot", #ingot-copper
-        "Gold Nugget", #nugget-nativegold 
-        "Silver Nugget", #nugget-nativesilver
-        "Honeycomb", #honeycomb
-        "Flax Twine", #flaxtwine
-        "Leather", #leather-normal-plain
-        "Lackey Hat", #clothes-head-lackey-hat
-        "Nadiyan Beekeeper Hood", #clothes-nadiya-head-beekeeper
-        "Sheepskull Mask", #clothes-face-sheepskull
-        "Pillory", #clothes-neck-pillory
-        "Fortune Teller Hip Scarf", #clothes-waist-fortune-teller-hip-scarf
-        "Tophat", #clothes-head-tophat
-        "Bamboo Cone Hat", #clothes-head-bamboo-conehat
-        "Large Bamboo Cone Hat", #clothes-head-bamboo-conehat-large
-        "Alchemist Hat", #clothes-head-alchemist
-        "Fortune Teller Scarf", #clothes-head-fortune-tellers-scarf
-        }
+    "Prospecting Pick",
+    "Fire Clay", 
+    "Storage Vessel",
+    "Crock",
+    "Blue Clay",
+    "Red Clay",
+    "Copper Chisel",
+    "Lime",
+    "Coal",
+    "Olivine",
+    # "Pie", no attributed items yet
+    "Temporal Gear",
+    "Rusty Gear",
+    "Ore Bomb",
+    "Candle", #candle
+    "Copper Ingot", #ingot-copper
+    "Gold Nugget", #nugget-nativegold 
+    "Silver Nugget", #nugget-nativesilver
+    "Honeycomb", #honeycomb
+    "Flax Twine", #flaxtwine
+    "Leather", #leather-normal-plain
+    }
+
+combined_list = {
+    "Prospecting Pick",
+    "Fire Clay",
+    "Storage Vessel",
+    "Crock",
+    "Blue Clay",
+    "Red Clay",
+    "Copper Chisel",
+    "Lime",
+    "Coal",
+    "Olivine",
+    # "Pie", no attributed items yet
+    "Temporal Gear",
+    "Rusty Gear",
+    "Ore Bomb",
+    "Candle", #candle
+    "Copper Ingot", #ingot-copper
+    "Gold Nugget", #nugget-nativegold
+    "Silver Nugget", #nugget-nativesilver
+    "Honeycomb", #honeycomb
+    "Flax Twine", #flaxtwine
+    "Leather", #leather-normal-plain
+    "Lackey Hat", #clothes-head-lackey-hat
+    "Nadiyan Beekeeper Hood", #clothes-nadiya-head-beekeeper
+    "Sheepskull Mask", #clothes-face-sheepskull
+    "Pillory", #clothes-neck-pillory
+    "Fortune Teller Hip Scarf", #clothes-waist-fortune-teller-hip-scarf
+    "Tophat", #clothes-head-tophat
+    "Bamboo Cone Hat", #clothes-head-bamboo-conehat
+    "Large Bamboo Cone Hat", #clothes-head-bamboo-conehat-large
+    "Alchemist Hat", #clothes-head-alchemist
+    "Fortune Teller Scarf", #clothes-head-fortune-tellers-scarf
+    }
 
 def def_item(name, classification = ItemClassification.filler):
     item_list.append([name, len(item_list)+1, classification])
 
+def_item("Victory", ItemClassification.progression)
 for each in progression_list:
     def_item(each, ItemClassification.progression)
 for each in useful_list:
@@ -113,7 +140,10 @@ class VintageItem(Item):
     game: str = "Vintage Story"
 
 def get_random_filler_item_name(world: VintageWorld) -> str:
-   return world.random.choice(list(filler_list))
+    if world.options.clothingfill:
+        return world.random.choice(list(combined_list))
+    else:
+        return world.random.choice(list(filler_list))
 
 def create_item_with_correct_classification(world: VintageWorld, name: str) -> VintageItem:
     classification = DEFAULT_ITEM_CLASSIFICATIONS[name]
@@ -125,6 +155,21 @@ def create_all_items(world: VintageWorld) -> None:
     itempool: list[Item] = []
     for each in progression_list:
         itempool.append(world.create_item(each))
+
+    victory_item = create_item_with_correct_classification(world, "Victory")
+
+    if world.options.victory == 0:
+        victory_loc = world.get_location("Achievement: Iron Age")
+    elif world.options.victory == 1:
+        victory_loc = world.get_location("Achievement: Steel Age")
+    elif world.options.victory == 2:
+        victory_loc = world.get_location("Achievement: Mechanical Menace")
+    elif world.options.victory == 3:
+        victory_loc = world.get_location("Achievement: Lens Got")
+    elif world.options.victory == 4:
+        victory_loc = world.get_location("Achievement: Lens Delivered")
+
+    victory_loc.place_locked_item(victory_item)
 
     number_of_items = len(itempool)
     number_of_unfilled_locations = len(world.multiworld.get_unfilled_locations(world.player))

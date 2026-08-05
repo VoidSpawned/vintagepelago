@@ -15,9 +15,11 @@ def create_all_regions(world: VintageWorld) -> None:
     stone_age = Region("Stone Age", world.player, world.multiworld)
     copper_age = Region("Copper Age", world.player, world.multiworld)
     bronze_age = Region("Bronze Age", world.player, world.multiworld)
+    story_first_age = Region("Story1 Age", world.player, world.multiworld)
+    story_second_age = Region("Story2 Age", world.player, world.multiworld)
     iron_age = Region("Iron Age", world.player, world.multiworld)
 
-    regions = [stone_age, copper_age, bronze_age, iron_age, traders]
+    regions = [stone_age, copper_age, bronze_age, story_first_age, story_second_age, iron_age, traders]
 
     world.multiworld.regions += regions
 
@@ -27,6 +29,8 @@ def connect_regions(world: VintageWorld) -> None:
     stone_age = world.get_region("Stone Age")
     copper_age = world.get_region("Copper Age")
     bronze_age = world.get_region("Bronze Age")
+    story_first_age = world.get_region("Story1 Age")
+    story_second_age = world.get_region("Story2 Age")
     iron_age = world.get_region("Iron Age")
 
     #filler.connect(stone_age, "Filler to Stone")
@@ -36,6 +40,8 @@ def connect_regions(world: VintageWorld) -> None:
     #stone_age.connect(filler, "Stone to Filler")
     copper_age.connect(bronze_age, "Copper to Bronze")
     bronze_age.connect(iron_age, "Bronze to Iron")
+    iron_age.connect(story_first_age, "Iron to Story1")
+    story_first_age.connect(story_second_age, "Story1 to Story2")
     #iron_age.connect(iron_age, "Iron to Steel")
     ##Can add a rule here??
 

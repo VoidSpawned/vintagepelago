@@ -25,8 +25,8 @@ namespace Multiworld
 		Infranet infranet = new Infranet();
 		APClient ap_client = new APClient();
 
-
-		public Dictionary<string, string> UseBlockAchievements = new Dictionary<string, string> 
+        #region Achievement dicts
+        public Dictionary<string, string> UseBlockAchievements = new Dictionary<string, string> 
 		{
 			{"quern-granite","Quernal Sanders"},
 			{"quern-andesite","Quernal Sanders"},
@@ -39,6 +39,35 @@ namespace Multiworld
 			{"anvil-iron","Iron Age"},
 			//{"anvil-steel","Steel Age"} no such thing in survival!
 		};
+
+		public Dictionary<string, string> BreakCropAchievements = new Dictionary<string, string>
+		{
+			{"crop-carrot-7", "Carrot Farmer"},
+            {"crop-flax-9", "Flax Farmer"},
+            {"crop-onion-7", "Onion Farmer"},
+            {"crop-spelt-9", "Spelt Farmer"},
+            {"crop-turnip-5", "Turnip Farmer"},
+            {"crop-parsnip-8", "Parsnip Farmer"},
+            {"crop-rice-10", "Rice Farmer"},
+            {"crop-rye-9", "Rye Farmer"},
+            {"crop-soybean-11", "Soybean Farmer"},
+            {"crop-cabbage-12", "Cabbage Farmer"},
+            {"crop-pineapple-16", "Pineapple Farmer Hot Crop"},
+            {"crop-cassava-9", "Cassava Farmer Hot Crop"},
+            {"crop-amaranth-9", "Amaranth Farmer Hot Crop"},
+            {"crop-peanut-9", "Peanut Farmer Hot Crop"},
+            {"crop-sunflower-12", "Sunflower Farmer"},
+            {"crop-fenne;-9", "Fennel Farmer"},
+            {"crop-licorice-9", "Licorice Farmer"},
+        };
+
+		public Dictionary<string, string> BreakBlockAchievements = new Dictionary<string, string>
+		{
+			{"locustnest-stalagmite-main", "Cave Cleaning"},
+            {"locustnest-stalagmite-small1", "Cave Cleaning"},
+            {"locustnest-stalagmite-small2", "Cave Cleaning"},
+            {"locustnest-cage", "Cave Cleaning"},
+        };
 
 		public Dictionary<string, string> ItemPickupAchievements = new Dictionary<string, string>
 		{
@@ -72,7 +101,25 @@ namespace Multiworld
 			{"wateringcan-orange-fired","Farming"},
 			{"wateringcan-red-fired","Farming"},
 			{"wateringcan-tan-fired","Farming"},
-			{"charcoal","Charcoal"},
+			{"seeds-carrot" , "Carrot Propagation"},
+            {"seeds-flax" , "Flax Propagation"},
+            {"seeds-onion" , "Onion Propagation"},
+            {"seeds-spelt" , "Spelt Propagation"},
+            {"seeds-turnip" , "Turnip Propagation"},
+            {"seeds-parsnip" , "Parsnip Propagation"},
+            {"seeds-rice" , "Rice Propagation"},
+            {"seeds-rye" , "Rye Propagation"},
+            {"seeds-soybean" , "Soybean Propagation"},
+            {"seeds-cabbage" , "Cabbage Propagation"},
+            {"seeds-pumpkin" , "Pumpkin Propagation"},
+            {"seeds-pineapple" , "Pineapple Propagation Hot Crop"},
+            {"seeds-cassava" , "Cassava Propagation Hot Crop"},
+            {"seeds-amaranth" , "Amaranth Propagation Hot Crop"},
+            {"seeds-peanut" , "Peanut Propagation Hot Crop"},
+            {"seeds-sunflower" , "Sunflower Propagation"},
+            {"seeds-fennel" , "Fennel Propagation"},
+            {"seeds-licorice" , "Licorice Propagation"},
+            {"charcoal","Charcoal"},
 		//	{"","Casting"},		//no good method for detecing the pour
 			{"pie-perfect","Pie"},
 			{"lantern-up","Lanterns"},
@@ -162,6 +209,23 @@ namespace Multiworld
 			{"fishraw-freshwater-pike-northern-juvenile" , "Got Fish"},
 			{"fishraw-freshwater-arapaima-arapaima-juvenile" , "Got Fish"},
 			{"fishraw-freshwater-arapaima-gigas-juvenile" , "Got Fish"},
+			{"ore-bountiful-nativecopper", "Copper Bounty"},
+            {"ore-bountiful-malachite", "Copper Bounty"},
+            {"ore-bountiful-cassiterite", "Tin Bounty"},
+            {"ore-bountiful-sphalerite", "Zinc Bounty"},
+            {"ore-bountiful-bismuthinite", "Bismuth Bounty"},
+            {"ore-bountiful-quartz_nativegold", "Gold Bounty"},
+            {"ore-bountiful-quartz_nativesilver", "Silver Bounty"},
+            {"ore-bountiful-galena", "Lead Bounty"},
+            {"ore-bountiful-limonite", "Iron Bounty"},
+            {"ore-bountiful-magnetite", "Iron Bounty"},
+            {"ore-bountiful-hematite", "Iron Bounty"},
+            {"ore-bountiful-chromite", "Chromite Bounty"},
+            {"ore-bountiful-ilmenite", "Titanium Bounty"},
+            {"ore-bountiful-pentlandite", "Nickel Bounty"},
+            {"schematic-glider", "Glider Schematics"},
+			{"jonaslens-north", "Lens Got"},
+			{"schematic-customtranslocator", "Lens Delivered"},
             {"ingot-steel","Steel Age"} //placeholder win condition
 		};
 
@@ -185,9 +249,48 @@ namespace Multiworld
 			{"shiver-stilt","Defeat a Shiver"},
 			{"shiver-bellhead","Defeat a Shiver"},
 			{"shiver-deepsplit","Defeat a Shiver"},
+			{"pig-eurasian-adult-male", "Pig Rancher"},
+            {"pig-eurasian-adult-female", "Pig Rancher"},
+            {"pig-redriver-adult-male", "Pig Rancher"},
+            {"pig-redriver-adult-female", "Pig Rancher"},
+            {"pig-warthog-adult-male", "Pig Rancher"},
+            {"pig-warthog-adult-female", "Pig Rancher"},
+            {"pig-eurasian-elder-male", "Pig Rancher"},
+            {"pig-eurasian-elder-female", "Pig Rancher"},
+            {"chicken-rooster", "Chicken Rancher"},
+            {"chicken-hen", "Chicken Rancher"},
+            {"goat-angora-adult-male", "Goat Rancher"},
+            {"goat-angora-adult-female", "Goat Rancher"},
+            {"goat-markhor-adult-male", "Goat Rancher"},
+            {"goat-markhor-adult-female", "Goat Rancher"},
+            {"goat-mountain-adult-male", "Goat Rancher"},
+            {"goat-mountain-adult-female", "Goat Rancher"},
+            {"goat-nubian-adult-male", "Goat Rancher"},
+            {"goat-nubian-adult-female", "Goat Rancher"},
+            {"goat-sirohi-adult-male", "Goat Rancher"},
+            {"goat-sirohi-adult-female", "Goat Rancher"},
+            {"goat-turdag-adult-male", "Goat Rancher"},
+            {"goat-turdag-adult-female", "Goat Rancher"},
+            {"goat-valais-adult-male", "Goat Rancher"},
+            {"goat-valais-adult-female", "Goat Rancher"},
+            {"sheep-bighorn-adult-male", "Sheep Rancher"},
+            {"sheep-bighorn-adult-female", "Sheep Rancher"},
+            {"sheep-mouflon-adult-male", "Sheep Rancher"},
+            {"sheep-mouflon-adult-female", "Sheep Rancher"},
+            {"hare-arctic-adult-male", "Hare Rancher"},
+            {"hare-arctic-adult-female", "Hare Rancher"},
+            {"hare-cape-adult-male", "Hare Rancher"},
+            {"hare-cape-adult-female", "Hare Rancher"},
+            {"hare-european-adult-male", "Hare Rancher"},
+            {"hare-european-adult-female", "Hare Rancher"},
+            {"hare-indian-adult-male", "Hare Rancher"},
+            {"hare-indian-adult-female", "Hare Rancher"},
+            {"hare-scrub-adult-male", "Hare Rancher"},
+            {"hare-scrub-adult-female", "Hare Rancher"},
+			{"eidolon-immobilized", "Mechanical Menace"},
 			//	any corrupted : Against the Storm is handled manually in the kill check
 		};
-
+        #endregion
 
         // Called on server and client
         public override void Start(ICoreAPI api)
@@ -196,17 +299,32 @@ namespace Multiworld
 
         public override void StartServerSide(ICoreServerAPI api)
         {
-            sapi = api;
-            sapi.Event.PlayerJoin += OnPlayerJoin;
+			sapi = api;
+
+			sapi.Network.RegisterChannel("sendDiscovery")
+				.RegisterMessageType<SendArchipelagoDiscovery>()
+				.SetMessageHandler<SendArchipelagoDiscovery>(SendInGameDiscovery);
+
+			sapi.Network.RegisterChannel("triggerCheevo")
+				.RegisterMessageType<TriggerCheevo>()
+				.SetMessageHandler<TriggerCheevo>(TriggerCheevo);
+
+			sapi.Network.RegisterChannel("locationVerified")
+				.RegisterMessageType<LocationExists>();
+
+			sapi.Event.PlayerJoin += OnPlayerJoin;
             sapi.Event.DidUseBlock += OnDidUseBlock;
 			sapi.Event.OnEntityDeath += OnEntityDeath;
 			sapi.Event.OnPlayerInteractEntity += OnPlayerInteractEntity;
 			sapi.Event.PlayerDisconnect += OnPlayerDisconnect;
+			sapi.Event.BreakBlock += OnBreakBlock;
 			sapi.Event.RegisterGameTickListener(TimeAchievementCheck, 1000*60);
 			sapi.Event.RegisterGameTickListener(APInventoryCheck, 1000*3);
+			
 
 			infranet.init_server(api);
-		}
+
+        }
 
         public override void StartClientSide(ICoreClientAPI api)
         {
@@ -250,19 +368,33 @@ namespace Multiworld
 				.Create("aplocations")
 				.WithDescription("Print a list of remaining checks")
 				.HandleWith(infranet.print_remaining_locations);
-	    
-	    
-	    
+
+			capi.ChatCommands
+				.Create("testfunction")
+				.WithDescription("Tests a client side Function")
+				.WithArgs(capi.ChatCommands.Parsers.Word("code"), capi.ChatCommands.Parsers.Float("intensity"), capi.ChatCommands.Parsers.Int("duration"))
+				.HandleWith(TriggerPerception);
+
+			capi.Network.RegisterChannel("sendDiscovery")
+					.RegisterMessageType<SendArchipelagoDiscovery>();
+
+			capi.Network.RegisterChannel("triggerCheevo")
+				.RegisterMessageType<TriggerCheevo>();
+
+			capi.Network.RegisterChannel("locationVerified")
+				.RegisterMessageType<LocationExists>()
+				.SetMessageHandler<LocationExists>(ClientSendsLocation);
+
 			capi.Event.RegisterGameTickListener(ap_client.Flush, 1000*3);	    
-			capi.Event.RegisterGameTickListener(infranet.RequestAPItemReceive, 1000*3);	    
+			capi.Event.RegisterGameTickListener(infranet.RequestAPItemReceive, 1000*3);
 			capi.Event.LevelFinalize += OnLevelFinalize;
 			capi.Event.LeaveWorld += OnLeaveWorld;
 			capi.Event.InGameDiscovery += OnPlayerDiscovery;
 
 			infranet.init_client(api, ap_client);
-		}
+        }
 
-		public void OnPlayerJoin(IServerPlayer player)
+        public void OnPlayerJoin(IServerPlayer player)
 		{
 			Dictionary<string, Dictionary<string, string>> spoilers = sapi.LoadModConfig<Dictionary<string, Dictionary<string, string>>>(player.PlayerName+"_spoilers.json");
 			if(spoilers == null)
@@ -296,7 +428,7 @@ namespace Multiworld
 								ItemStack stack = slot.Itemstack;
 								if( stack.Attributes["ap_item"] != null && stack.Attributes.GetBool("ap_item", false))
 								{
-									TriggerAchievement(stack.Attributes.GetString("location"), player);
+									TriggerAchievement(stack.Attributes.GetString("location"), player.PlayerName);
 									slot.Itemstack = null;
 									slot.MarkDirty();
 								}
@@ -313,8 +445,20 @@ namespace Multiworld
 											break;
 									}
 									code = code.Split(':')[1];
+									if (code.Contains("bountiful"))
+									{
+										var splitcode = code.Split("-");
+										code = splitcode[0] + "-" + splitcode[1] + "-" + splitcode[2];
+                                    }
 									if(ItemPickupAchievements.Keys.Contains(code))
-										TriggerAchievement("Achievement: " + ItemPickupAchievements[code], player);
+										if (code.Contains("ore"))
+										{
+                                            TriggerAchievement(ItemPickupAchievements[code], player.PlayerName);
+                                        }
+										else
+										{
+                                            TriggerAchievement("Achievement: " + ItemPickupAchievements[code], player.PlayerName);
+                                        }
 								}
 							}	
 						}
@@ -348,26 +492,46 @@ namespace Multiworld
 						break;
 				}
 					if(cheevo != "") {
-						TriggerAchievement(cheevo, p);
+						TriggerAchievement(cheevo, p.PlayerName);
 								}
 				if(one_year)
-					TriggerAchievement("Achievement: One Year", p);
+					TriggerAchievement("Achievement: One Year", p.PlayerName);
 			}
 		}
 
 
 		public void OnEntityDeath(Entity entity, DamageSource source)
-		{	//Check for kill achievements like Defeat a Bear
+		{   //Check for kill achievements like Defeat a Bear
 			//Console.WriteLine(entity.Code.ToString());
-			if(source.GetCauseEntity() is EntityPlayer ePlayer and not null)
+			int generation;
+			if (source.GetCauseEntity() is EntityPlayer ePlayer and not null)
+			{
+				string code = entity.Code.ToString().Split(':')[1];
+				IServerPlayer player = (IServerPlayer)sapi.World.PlayerByUid(ePlayer.PlayerUID);
+				if (KillAchievements.Keys.Contains(code))
 				{
-					string code = entity.Code.ToString().Split(':')[1];
-					IServerPlayer player = (IServerPlayer)sapi.World.PlayerByUid(ePlayer.PlayerUID);
-					if(KillAchievements.Keys.Contains(code))
-						TriggerAchievement("Achievement: "+KillAchievements[code], player);
-					if(code.Contains("corrupt"))
-						TriggerAchievement("Achievement: Against the Storm", player);
+					TriggerAchievement("Achievement: " + KillAchievements[code], player.PlayerName);
 				}
+				if (entity.WatchedAttributes.Keys.Contains("generation"))
+				{
+					if (Int32.TryParse(entity.WatchedAttributes["generation"].GetValue().ToString(), out int gen))
+					{
+						Console.WriteLine("we got gens");
+						if (gen >= 1 && KillAchievements.Keys.Contains(code))
+						{
+							TriggerAchievement("Achievement: " + KillAchievements[code], player.PlayerName);
+						}
+					}
+				}
+				if (code.Contains("corrupt"))
+				{
+					TriggerAchievement("Achievement: Against the Storm", player.PlayerName);
+				}
+			}
+			else
+			{
+				Console.WriteLine(entity.Code.ToString());
+			}
 		}
 
 		public void OnDidUseBlock(IServerPlayer byPlayer, BlockSelection blockSel)
@@ -375,29 +539,87 @@ namespace Multiworld
 			string block = byPlayer.CurrentBlockSelection.Block.Code.ToString().Split(':')[1];
 			if(UseBlockAchievements.Keys.Contains(block))
 			{
-				TriggerAchievement("Achievement: "+UseBlockAchievements[block], byPlayer);
+				TriggerAchievement("Achievement: "+UseBlockAchievements[block], byPlayer.PlayerName);
 			}
 		}
 
-		public void TriggerAchievement(string loc, IServerPlayer byPlayer)
+        private void OnBreakBlock(IServerPlayer byPlayer, BlockSelection blockSel, ref float dropQuantityMultiplier, ref EnumHandling handling)
+        {
+			Console.WriteLine(blockSel.Block.Code.ToString());
+			string block = blockSel.Block.Code.ToString().Split(":")[1];
+			List<string> southCrops = ["Pineapple", "Casava", "Amaranth", "Peanut"];
+			var downPos = blockSel.Position.DownCopy();
+			
+			Block blockBelow = sapi.World.BlockAccessor.GetBlock(downPos);
+			if (blockBelow.ToString().Contains("farmland") && BreakCropAchievements.Keys.Contains(block))
+			{
+				if(southCrops.Any(crop => crop.Contains(block)))
+				{
+                    TriggerAchievement("Achievement: " + BreakCropAchievements[block], byPlayer.PlayerName);
+                }
+				else
+				{
+                    TriggerAchievement("Achievement: " + BreakCropAchievements[block], byPlayer.PlayerName);
+                }
+			}
+			else if (BreakBlockAchievements.Keys.Contains(block))
+			{
+                TriggerAchievement("Achievement: " + BreakBlockAchievements[block], byPlayer.PlayerName);
+            }
+			
+        }
+
+        public void TriggerAchievement(string loc, string byPlayer, INetworkMessage message = null)
 		{	//Dispatch a packet from the server to the client, notifying that an achievement has been reached
-			Dictionary<string, Dictionary<string, string>> loc_list = sapi.LoadModConfig<Dictionary<string, Dictionary<string, string>>>(byPlayer.PlayerName+"_spoilers.json");
+			Dictionary<string, Dictionary<string, string>> loc_list = sapi.LoadModConfig<Dictionary<string, Dictionary<string, string>>>(byPlayer+"_spoilers.json");
 			if(loc_list.ContainsKey(loc))
 			{
-				sapi.SendIngameDiscovery(byPlayer,"location", loc);
-				infranet.ServerSendLocationCheck(loc, byPlayer.PlayerName);
-				loc_list.Remove(loc);
-				sapi.StoreModConfig(loc_list, byPlayer.PlayerName+"_spoilers.json");
-			}
+                foreach(IServerPlayer p in sapi.World.AllOnlinePlayers)
+				{
+					if (p.PlayerName == byPlayer){
+                        infranet.ServerSendLocationCheck(loc, byPlayer);
+                        sapi.SendIngameDiscovery(p, "location", loc);
+                    }
+				}
+                loc_list.Remove(loc);
+                sapi.StoreModConfig(loc_list, byPlayer + "_spoilers.json");
+            }
 		}
+
+		public void SendInGameDiscovery(IServerPlayer byPlayer, SendArchipelagoDiscovery pkt)
+		{
+			sapi.SendIngameDiscovery(byPlayer, "location", pkt.loc);
+		}
+
+		public void ClientSendsLocation(LocationExists pkt)
+		{
+			capi.Network.GetChannel("sendDiscovery")
+					.SendPacket(new SendArchipelagoDiscovery { loc = pkt.loc, });
+		}
+
+		public void TriggerCheevo(IServerPlayer player, TriggerCheevo pkt)
+		{
+			TriggerAchievement(pkt.loc, player.PlayerName);
+		}
+
+		public TextCommandResult TriggerPerception(TextCommandCallingArgs arg)
+		{
+			capi.Render.PerceptionEffects.TriggerEffect(arg[0].ToString(), (float)arg[1]);
+			
+
+            return TextCommandResult.Success("Triggered function");
+        }
 
 		public void OnPlayerDiscovery(object sender, string discoverycode, string text)
 		{   //When a player gets a lore discovery doesn't matter which send a check
-			JsonObject APConfig = sapi.LoadModConfig("multiworld_config.json");
-            Dictionary<string, Dictionary<string, string>> loc_list = sapi.LoadModConfig<Dictionary<string, Dictionary<string, string>>>(APConfig["VSName"] + "_spoilers.json");
-			if (loc_list.Keys.Contains("lore-"))
+            JsonObject APConfig = capi.LoadModConfig("multiworld_config.json");
+            Dictionary<string, Dictionary<string, string>> loc_list = capi.LoadModConfig<Dictionary<string, Dictionary<string, string>>>(APConfig["VSName"] + "_spoilers.json");
+			string loc_list_first = loc_list.First().Key;
+            Console.WriteLine("Hey we checked here" + Environment.NewLine);
+            if(discoverycode.Split("-")[0] == "lore" && loc_list_first.Contains("lore-"))
 			{
-				Console.WriteLine("Did I even get here");	
+				capi.Network.GetChannel("triggerCheevo")
+					.SendPacket(new TriggerCheevo {loc = loc_list_first });
 			}
 
         }

@@ -33,7 +33,27 @@ namespace Multiworld
 		public List<string> Items = new List<string>();
 		public string Player;
 	}
-	public class Infranet
+
+	[ProtoContract(ImplicitFields = ImplicitFields.AllPublic)]
+	public class SendArchipelagoDiscovery
+	{
+		public string loc;
+	}
+
+    [ProtoContract(ImplicitFields = ImplicitFields.AllPublic)]
+    public class LocationExists
+    {
+		public string loc;
+        public string PlayerName;
+    }
+
+    [ProtoContract(ImplicitFields = ImplicitFields.AllPublic)]
+    public class TriggerCheevo
+    {
+        public string loc;
+    }
+
+    public class Infranet
 	{
 		IServerNetworkChannel serverChannel;
         IClientNetworkChannel clientChannel;
@@ -211,7 +231,7 @@ namespace Multiworld
 			{
 				string[] splitstring = ap_notification.message.Split(';');
 				ap_client.LocationCheck(splitstring[1], splitstring[2]);
-				string goal = "Achievement: " + ap_client.config.win_condition + " Age";
+				string goal = ap_client.config.win_condition;
 				if (splitstring[1] == goal)
 				{
 					ap_client.session.SetGoalAchieved();

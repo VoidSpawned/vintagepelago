@@ -27,21 +27,28 @@ class LoreProgression(Range):
     range_end = 101
     default = 0
 
+class SouthernCrops(Toggle):
+    """
+        Turns on Southern crop Achievement locations.
+    """
+    display_name = "Enable southern crop Achievements" 
+    default = 0
+
 class VictoryCondition(Choice):
     """
         0 = Must reach Iron_Age. (use an iron anvil)
         1 = Must reach Steel to win.
-        2 = Must kill Chapter 1 boss.
-        3 = Must kill Chapter 2 boss.
+        2 = Must kill Chapter 1 boss and get the elucidatory vessel.
+        3 = Must kill Chapter 2 boss and grab the centerpiece of the arena.
         4 = Must deliver Chapter 2 boss item to Tobias.
     """
     display_name = "Victory Condition"
     option_iron = 0
     option_steel = 1
-    option_chapter1 = 2
-    option_chapter2 = 3
-    option_lens = 4
-    default = 0
+    option_boss1 = 2
+    option_boss2 = 3
+    option_delivery = 4
+    default = option_iron
 
 #class TemporalChance(Range):
 #    """
@@ -59,6 +66,14 @@ class TraderProgression(Toggle):
     Keep in mind that this can make getting these items as tedious / grindy.
     """
     display_name = "Trader Progression"
+    default = 0
+
+class ClothingFiller(Toggle):
+    """
+    Clothing items can appear as filler items
+    """
+    display_name = "Allow Clothing in filler"
+    default = 0
 
 #class DungeonProgression(Toggle):
 #    """
@@ -72,6 +87,8 @@ class VintageOptions(PerGameCommonOptions):
     casual: Casual
     victory: VictoryCondition
     prices: Prices
+    cropsplus: SouthernCrops
+    clothingfill: ClothingFiller
     lore_progression: LoreProgression
 #    temporal_chance: TemporalChance
     trader_progression: TraderProgression
@@ -88,6 +105,7 @@ option_presets = {
 #            "temporal_chance": 2,
             "victory": 1,
             "lore_progression": 40,
+            "cropsplus": 0,
             "trader_progression": False,
 #            "dungeon_progression": False
             },
@@ -96,6 +114,7 @@ option_presets = {
 #            "temporal_chance": 2,
             "victory": 4,
             "lore_progression": 101,
+            "cropsplus": 1,
             "trader_progression": True,
 #            "dungeon_progression": True
             },
@@ -104,6 +123,7 @@ option_presets = {
 #            "temporal_Chance": 30,
             "victory": 0,
             "lore_progression": 0,
+            "cropsplus": 0,
             "trader_progression": False,
 #            "dungeon_progression": False
             }
