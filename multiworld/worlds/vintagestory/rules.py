@@ -38,7 +38,7 @@ def set_all_entrance_rules(world: VintageWorld) -> None:
     set_rule(story_first_to_story_second, lambda state: state.has_all(["Map to Lazaret", "Map to Devastation", "Map to Tobias cave", "Tamed Elk"], world.player))
     
     set_rule(bronze_to_iron, lambda state: state.has_any(["Iron Pickaxe", "Steel Pickaxe"], world.player)
-             and state.has("Quern", world.player))
+             and state.has_all(["Quern", "Bellow"], world.player))
                     #lambda = "i'm gonna make a one time function"
                     #so because it has to be a function in slot 2, we make one with one statement
 

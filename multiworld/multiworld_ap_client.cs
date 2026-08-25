@@ -16,22 +16,24 @@ using Vintagestory.API.Server;
 using Vintagestory.API.Config;
 using Vintagestory.API.Common;
 using Vintagestory.API.Util;
+using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
+using Vintagestory.API.Datastructures;
 
 //this file manages the VS client's connection to AP, it will have utils for handling the session, item receipt, etc, any direct communication to AP
 namespace Multiworld
 {
-    	public class ClientConfig
-    	{
-		public string APName = "APNameHere";
-		public string APIP = "localhost";
-		public int APPort = 38281;
-		public string VSName = "";
-		public string Password = "";
-		public string win_condition = "Iron Age";
-		public int traderPrices = 10;
-		public int APReceivedIndex = 0;
-		public Dictionary<string, Dictionary<string, string>> APData;
-    	}
+    public class ClientConfig
+    {
+	public string APName = "APNameHere";
+	public string APIP = "localhost";
+	public int APPort = 38281;
+	public string VSName = "";
+	public string Password = "";
+	public string win_condition = "Iron Age";
+	public int traderPrices = 10;
+	public int APReceivedIndex = 0;
+	public Dictionary<string, Dictionary<string, string>> APData;
+    }
     
 	public class APItem
 	{
@@ -45,6 +47,7 @@ namespace Multiworld
 	{
 		public ClientConfig config;
 		public ArchipelagoSession session;
+		public static DeathLinkService DeathLinkService { get; protected set; }
 		public ICoreClientAPI capi;
 		public List<string> ap_chat_queue = new List<string>();
 		public List<string> ap_items_to_receive = new List<string>();
@@ -72,29 +75,37 @@ namespace Multiworld
 		public void LoadClientConfig()
 		{
 			config = capi.LoadModConfig<ClientConfig>("multiworld_config.json");
-            if(config == null)
-            {
-                config = new ClientConfig();
+			if(config == null)
+			{
+				config = new ClientConfig();
 				config.VSName = capi.World.Player.PlayerName;
-                capi.StoreModConfig(config, "multiworld_config.json");
-           	}
+				capi.StoreModConfig(config, "multiworld_config.json");
+			}
 		}
 
 		public void ConnectSignals()
 		{
 			session.Items.ItemReceived += OnItemReceived;
-    	    session.MessageLog.OnMessageReceived += OnMessageReceived;
-            session.Socket.PacketReceived += OnPacketReceived;
+    		session.MessageLog.OnMessageReceived += OnMessageReceived;
+			session.Socket.PacketReceived += OnPacketReceived;
+			DeathLinkService.OnDeathLinkReceived += OnDeathReceived;
+			
 		}	
 
 		public void Login()
 		{ 
 			LoadClientConfig();
 			session = ArchipelagoSessionFactory.CreateSession(config.APIP, config.APPort);
+			DeathLinkService = session.CreateDeathLinkService();
 			ConnectSignals(); //must sub to events before logging in
-            LoginResult result = session.TryConnectAndLogin("Vintage Story", config.APName, ItemsHandlingFlags.AllItems, requestSlotData: true, password: config.Password);
+			LoginResult result = session.TryConnectAndLogin("Vintage Story", config.APName, ItemsHandlingFlags.AllItems, requestSlotData: true, password: config.Password);
 			if(result.Successful)
 				session.Socket.SendPacket(new SyncPacket());
+				Dictionary<string, object> slotdata = session.DataStorage.GetSlotData();
+				if ((Int64)slotdata["deathlink"] == 1)
+				{
+					DeathLinkService.EnableDeathLink();
+				}
 		}
 
 		public void APDisconnect()
@@ -108,6 +119,22 @@ namespace Multiworld
 			{
 				session.Locations.CompleteLocationChecks(session.Locations.GetLocationIdFromName("Vintage Story", loc));
 			}
+		}
+
+		public void OnDeathReceived(DeathLink deathLinkReceived)
+		{
+			string receivedFrom = deathLinkReceived.Source;
+			string cause = deathLinkReceived.Cause;
+			Console.WriteLine($"{receivedFrom} {cause}");
+			string JsonDeathlink = "{" + $"'{receivedFrom}': '{cause}'" + "}";
+			IAttribute deathTree = TreeAttribute.FromJson(JsonDeathlink);
+            capi.Event.PushEvent("DeathLink", deathTree);
+			
+		}
+
+		public static void SendDeathLink(string playername, string deathMessage)
+		{
+			DeathLinkService.SendDeathLink(new DeathLink(playername, deathMessage));
 		}
 
 		public Dictionary<string, Dictionary<string, string>> GetScoutData()
@@ -130,7 +157,7 @@ namespace Multiworld
 					case 2:
 						vitem["Classification"] = "Useful";
 						break;
-					case 3:
+					case 4:
 						vitem["Classification"] = "Trap";
 						break;
 					default:
@@ -149,10 +176,10 @@ namespace Multiworld
 		}
 
 		public void OnItemReceived( ReceivedItemsHelper receivedItemsHelper )
-	        {
+			{
 			//Console.WriteLine(session.Items.PeekItem().ItemDisplayName + " incoming");
 			ProcessAPItemQueue();	
-	        }
+			}
 
 		public void ProcessAPItemQueue()
 		{
@@ -190,11 +217,11 @@ namespace Multiworld
 					else
 					{
 						code += "elk-female-adult";
-                    }
+					}
 
-                }
+				}
 				
-            }
+			}
 			else if(APItemToLocal.blocks.Keys.Contains(displayName))
 			{
 				code = "block:game:"+APItemToLocal.blocks[displayName];
@@ -204,99 +231,200 @@ namespace Multiworld
 				int rand = capi.World.Rand.Next(5,25);
 				code = "quantity:game:"+APItemToLocal.quantity[displayName]+":"+rand.ToString();
 			}
-			if(code == displayName)
+			else if (APItemToLocal.traps.Keys.Contains(displayName))
+			{
+				int rand = capi.World.Rand.Next(3, 8);
+				int randType = capi.World.Rand.Next(0, 4);
+				switch (displayName)
+				{
+					case string a when a.Contains("Enemy"):
+						switch (randType)
+						{
+							case 0:
+								code = "enemy:game:wolf-eurasian-adult-male";
+								break;
+							case 1:
+								code = "enemy:game:drifter-deep";
+								break;
+							case 2:
+								code = "enemy:game:bowtorn-deep";
+                                break;
+							case 3:
+								code = "enemy:game:shiver-deep";
+                                break;
+							case 4:
+								code = "enemy:game:locust-corrupt";
+                                break;
+						}
+						break;
+                    case string a when a.Contains("Psychedelic"):
+						code = "effect:game:psychedelic";
+                        break;
+                    case string a when a.Contains("Drunk"):
+                        code = "effect:game:drunk";
+                        break;
+                    case string a when a.Contains("Nutrition"):
+						switch (randType)
+						{
+							case 0:
+                                code = "stat:game:nutrition-fruit";
+                                break;
+                            case 1:
+                                code = "stat:game:nutrition-vegetable";
+                                break;
+                            case 2:
+                                code = "stat:game:nutrition-grain";
+								break;
+                            case 3:
+                                code = "stat:game:nutrition-protein";
+                                break;
+                            case 4:
+                                code = "stat:game:nutrition-dairy";
+                                break;
+                        }
+						break;
+                    case string a when a.Contains("Hunger"):
+                        code = "stat:game:satiety";
+                        break;
+                    case string a when a.Contains("Damage"):
+						code = "stat:game:damage";
+                        break;
+                    default:
+						Console.WriteLine("not a recognized trap");
+						break;
+				}
+            }
+			else if (APItemToLocal.traitsCode.Keys.Contains(displayName))
+			{
+				code = $"trait:game:{APItemToLocal.traitsCode[displayName]}";
+			}
+			if (code == displayName)
+			{
 				Console.WriteLine("Failed to resolve code: " + code);
+			}
 			return code;
 		}
 
 		public class APItemToLocal
 		{
 			public static Dictionary<string, string> items = new Dictionary<string, string>
-		{
-			{"Hunter Backpack", "hunterbackpack"},
-			{"Copper Pickaxe", "pickaxe-copper"},
-			{"Copper Saw", "saw-copper"},
-			{"Copper Hammer", "hammer-copper"},
-			{"Linen Sack", "linensack"},
-			{"Black Bronze Pickaxe", "pickaxe-blackbronze"},
-			{"Iron Pickaxe", "pickaxe-iron"},
-			{"Steel Pickaxe", "pickaxe-steel"},
-			{"Steel Falx", "blade-falx-steel"},
-			{"Prospecting Pick", "prospectingpick-copper"},
-			{"Copper Chisel", "chisel-copper"},
-			{"Flax Seeds", "seeds-flax"},
-			{"Charcoal", "charcoal"},
-			{"Temporal Gear", "gear-temporal"},
-			{"Forlorn Hope Estoc", "blade-forlorn-iron"},
-			{"Copper Shears", "shears-copper"},
-			{"Copper Scythe", "scythe-copper"},
-			{"Candle", "candle"},
-			{"Copper Ingot", "ingot-copper"},
-			{"Gold Nugget", "nugget-nativegold"},
-			{"Silver Nugget", "nugget-nativesilver"},
-			{"Honeycomb", "honeycomb"},
-			{"Leather", "leather-normal-plain"},
-			{"Lackey Hat", "clothes-head-lackey-hat"},
-			{"Nadiyan Beekeeper Hood", "clothes-nadiya-head-beekeeper"},
-			{"Sheepskull Mask", "clothes-face-sheepskull"},
-			{"Pillory", "clothes-neck-pillory"},
-			{"Fortune Teller Hip Scarf", "clothes-waist-fortune-teller-hip-scarf"},
-			{"Tophat", "clothes-head-tophat"},
-			{"Bamboo Cone Hat", "clothes-head-bamboo-conehat"},
-			{"Large Bamboo Cone Hat", "clothes-head-bamboo-conehat-large"},
-			{"Alchemist Hat", "clothes-head-alchemist"},
-			{"Fortune Teller Scarf", "clothes-head-fortune-tellers-scarf"},
-			{"leather Backpack", "backpack-normal"},
-			{"Tamed Elk", "creature-tameddeer-"}, //We later attribute the gender and albino-ness of the deer
-			{"Agriculture Trader Item", "creature-trader-male-agriculture-temperate"},
-            {"Artisan Trader Item", "creature-trader-male-artisan-temperate"},
-			{"Building Trader Item", "creature-trader-male-buildmaterials-temperate"},
-			{"Clothing Trader Item", "creature-trader-male-clothing-temperate"},
-			{"Commodities Trader Item", "creature-trader-male-commodities-temperate"},
-			{"Furniture Trader Item", "creature-trader-male-furniture-temperate"},
-			{"Luxuries Trader Item", "creature-trader-male-luxuries-temperate"},
-			{"Survival Trader Item", "creature-trader-male-survivalgoods-temperate"},
-			{"Treasure Trader Item", "creature-trader-male-treasurehunter-temperate"},
-            {"Map to Archives", "locatormap-resonancearchive"},
-			{"Map to Lazaret", "letter-lazaret"},
-			{"Map to Devastation", "locatormap-devastationarea"},
-	        {"Map to Tobias cave", "locatormap-cavetobias"},
-        };
+			{
+				{"Hunter Backpack", "hunterbackpack"},
+				{"Copper Pickaxe", "pickaxe-copper"},
+				{"Copper Saw", "saw-copper"},
+				{"Copper Hammer", "hammer-copper"},
+				{"Linen Sack", "linensack"},
+				{"Black Bronze Pickaxe", "pickaxe-blackbronze"},
+				{"Iron Pickaxe", "pickaxe-iron"},
+				{"Steel Pickaxe", "pickaxe-steel"},
+				{"Steel Falx", "blade-falx-steel"},
+				{"Prospecting Pick", "prospectingpick-copper"},
+				{"Copper Chisel", "chisel-copper"},
+				{"Flax Seeds", "seeds-flax"},
+				{"Charcoal", "charcoal"},
+				{"Temporal Gear", "gear-temporal"},
+				{"Forlorn Hope Estoc", "blade-forlorn-iron"},
+				{"Copper Shears", "shears-copper"},
+				{"Copper Scythe", "scythe-copper"},
+				{"Candle", "candle"},
+				{"Copper Ingot", "ingot-copper"},
+				{"Gold Nugget", "nugget-nativegold"},
+				{"Silver Nugget", "nugget-nativesilver"},
+				{"Honeycomb", "honeycomb"},
+				{"Leather", "leather-normal-plain"},
+				{"Lackey Hat", "clothes-head-lackey-hat"},
+				{"Nadiyan Beekeeper Hood", "clothes-nadiya-head-beekeeper"},
+				{"Sheepskull Mask", "clothes-face-sheepskull"},
+				{"Pillory", "clothes-neck-pillory"},
+				{"Fortune Teller Hip Scarf", "clothes-waist-fortune-teller-hip-scarf"},
+				{"Tophat", "clothes-head-tophat"},
+				{"Bamboo Cone Hat", "clothes-head-bamboo-conehat"},
+				{"Large Bamboo Cone Hat", "clothes-head-bamboo-conehat-large"},
+				{"Alchemist Hat", "clothes-head-alchemist"},
+				{"Fortune Teller Scarf", "clothes-head-fortune-tellers-scarf"},
+				{"leather Backpack", "backpack-normal"},
+				{"Tamed Elk", "creature-tameddeer-"}, //We later attribute the gender and albino-ness of the deer
+				{"Agriculture Trader Item", "creature-trader-male-agriculture-temperate"},
+				{"Artisan Trader Item", "creature-trader-male-artisan-temperate"},
+				{"Building Trader Item", "creature-trader-male-buildmaterials-temperate"},
+				{"Clothing Trader Item", "creature-trader-male-clothing-temperate"},
+				{"Commodities Trader Item", "creature-trader-male-commodities-temperate"},
+				{"Furniture Trader Item", "creature-trader-male-furniture-temperate"},
+				{"Luxuries Trader Item", "creature-trader-male-luxuries-temperate"},
+				{"Survival Trader Item", "creature-trader-male-survivalgoods-temperate"},
+				{"Treasure Trader Item", "creature-trader-male-treasurehunter-temperate"},
+				{"Map to Archives", "locatormap-resonancearchive"},
+				{"Map to Lazaret", "letter-lazaret"},
+				{"Map to Devastation", "locatormap-devastationarea"},
+				{"Map to Tobias cave", "locatormap-cavetobias"},
+			};
 
-		public static Dictionary<string, string> blocks = new Dictionary<string, string>
-		{
-			//{"Pie", "pie-perfect"}, //needs attributes
-			{"Storage Vessel", "storagevessel-blue-fired"},
-			{"Ore Bomb", "bomb-ore"},
-			{"Cookpot", "claypot-blue-fired"},
-			{"Crock", "crock-blue-fired"},
-			{"Bowl", "bowl-blue-fired"},
-			{"Barrel", "barrel"},
-			{"Quern", "quern-granite"},
-			{"Crucible", "crucible-blue-fired"},
-			{"Chest", "chest-east"},
-			{"Bucket", "woodbucket"},
+			public static Dictionary<string, string> blocks = new Dictionary<string, string>
+			{
+				//{"Pie", "pie-perfect"}, //needs attributes
+				{"Storage Vessel", "storagevessel-blue-fired"},
+				{"Ore Bomb", "bomb-ore"},
+				{"Cookpot", "claypot-blue-fired"},
+				{"Crock", "crock-blue-fired"},
+				{"Bowl", "bowl-blue-fired"},
+				{"Barrel", "barrel"},
+				{"Quern", "quern-granite"},
+				{"Crucible", "crucible-blue-fired"},
+				{"Chest", "chest-east"},
+				{"Bucket", "woodbucket"},
+				{"Bellow", "bellows-small-north"},
 
-		};
+			};
 
-		public static Dictionary<string, string> quantity = new Dictionary<string, string>
-		{
-			{"Fire Clay", "clay-fire"},
-			{"Blue Clay", "clay-blue"},
-			{"Red Clay", "clay-red"},
-			{"Lime", "lime"},
-			{"Coal", "ore-bituminouscoal"},
-			{"Flax Twine", "flaxtwine"},
-			{"Rusty Gear", "gear-rusty"},
-			{"Borax", "ore-borax"},
-			{"Olivine", "ore-olivine"},
-			{"Bauxite Stones", "stone-bauxite"},
-		
-		};
-    }
+			public static Dictionary<string, string> quantity = new Dictionary<string, string>
+			{
+				{"Fire Clay", "clay-fire"},
+				{"Blue Clay", "clay-blue"},
+				{"Red Clay", "clay-red"},
+				{"Lime", "lime"},
+				{"Coal", "ore-bituminouscoal"},
+				{"Flax Twine", "flaxtwine"},
+				{"Rusty Gear", "gear-rusty"},
+				{"Borax", "ore-borax"},
+				{"Olivine", "ore-olivine"},
+				{"Bauxite Stones", "stone-bauxite"},
 
-	public void OnPacketReceived(ArchipelagoPacketBase packet)
-	        { //Function for debugging
+			};
+
+			public static Dictionary<string, string> traps = new Dictionary<string, string>
+			{
+				{"Enemy Trap", "creature"},
+                {"Psychedelic Trap", "psychedelic"},
+                {"Drunk Trap", "drunk"},
+                {"Nutrition Trap", "nutrition"},
+                {"Hunger Trap", "satiety"},
+                {"Damage Trap", "damage"},
+            };
+
+			public static Dictionary<string, string> traitsCode = new()
+			{
+                {"Focused", "focused"},
+				{"Resourceful", "resourceful"},
+				{"Fleetfooted", "fleetfooted"},
+				{"Forager", "forager"},
+                {"Pilferer", "pilferer"},
+				{"Furtive", "furtive"},
+				{"Precise", "precise"},
+				{"Technical", "technical"},
+				{"Soldier", "soldier"},
+				{"Hardy", "hardy"},
+				{"Mender", "mender"},
+				{"Improviser", "improviser"},
+				{"Tinkerer", "tinkerer"},
+				{"Merciless", "merciless"},
+				{"Clothier", "clothier"},
+				{"Bowyer", "bowyer"}
+			};
+
+		}
+
+		public void OnPacketReceived(ArchipelagoPacketBase packet)
+			{ //Function for debugging
 			switch (packet)
 			{
 				case DataPackagePacket dataPacket:
@@ -317,7 +445,7 @@ namespace Multiworld
 					break;
 			}
 			//Console.WriteLine($"[PacketDump] {packet}");
-	        }
+			}
 	}
 }
 

@@ -1,9 +1,13 @@
 ﻿using Archipelago.MultiClient.Net;
+using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.ExceptionServices;
+
+
 //
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -14,16 +18,56 @@ using Vintagestory.API.MathTools;
 using Vintagestory.API.Server;
 using Vintagestory.API.Util;
 using Vintagestory.GameContent;
+using Vintagestory.Server;
 
 namespace Multiworld
 {
-    public class MultiworldSystem : ModSystem
-    {
+	public class MultiworldSystem : ModSystem
+	{
         ICoreClientAPI capi;
-        ICoreServerAPI sapi;
+		ICoreServerAPI sapi;
 		IPlayer Player;
+		public static ICoreAPI dapi { get; protected set;}
 		Infranet infranet = new Infranet();
 		APClient ap_client = new APClient();
+		public static Dictionary<string, string> deathLinkMessages = new()
+		{
+			//base damage types need to be capitalized
+			{"Hunger", "thought food was optional."},
+			{"Fire", "went up in flames."},
+			{"Electricity", "lit up like a light bulb."},
+			{"Suffocation", "forgot the need to breathe."},
+			{"Gravity", "thought we could fly."},
+			{"Explosion", "panicked after igniting a bomb."},
+			{"Poison", "didn't know they applied as a food taster."},
+			{"Acid", "received a trap with not enough health left."},
+			//these can be lowercase considering creature codes are all lowercase
+			{"wolf", "was wolf bait."},
+			{"pig-eurasian", "messed around with a boar."},
+			{"pig-redriver", "messed around with a hog."},
+			{"pig-warthog", "messed around with a warthog."},
+            {"bear-black", "misremembered what to do and played dead."},
+            {"bear-brown", "suffered a grizzly death."},
+            {"bear-polar", "found out that polar bears are dangerous."},
+			{"bear-sun", "didn't praise the sun(bear) enough."},
+            {"bear-panda", "became the endangered species instead."},
+            {"drifter", "tried to hug a drifter."},
+			{"shiver", "shivered their last"},
+			{"bowtorn", "got impaled by a bone arrow."},
+            {"eidolon", "got crushed by an immobilized eidolon."},
+			{"erel", "mistook themselves as the stone that killed the bird."},
+            {"sheep", "got horned to death."},
+            {"locust-bronze", "has locusts all over their dead body."},
+			{"locust-corrupt", "has corrupt locusts all over their dead body."},
+            {"locust-corrupt-sawblade", "got sawed into pieces by a sawblade locust."},
+            {"goat-muskox", "was killed by the GOAT goat."},
+            {"goat-takin", "'s life was taken by a takin."},
+            {"goat", "was killed by a baaaad goat."},
+            {"deer-moose", "got killed by a moose on the loose." },
+            {"deer-elk", "was killed by an elk." },
+            {"tameddeer-elk", "was backstabbed by their elk."},
+            {"deer", "was killed by a deer, oh dear."},
+        };
 
         #region Achievement dicts
         public Dictionary<string, string> UseBlockAchievements = new Dictionary<string, string> 
@@ -312,6 +356,10 @@ namespace Multiworld
 			sapi.Network.RegisterChannel("locationVerified")
 				.RegisterMessageType<LocationExists>();
 
+			sapi.Network.RegisterChannel("DeathlinkReceived")
+				.RegisterMessageType<ClientDeathLinkReceived>()
+				.SetMessageHandler<ClientDeathLinkReceived>(KillPlayer);
+
 			sapi.Event.PlayerJoin += OnPlayerJoin;
             sapi.Event.DidUseBlock += OnDidUseBlock;
 			sapi.Event.OnEntityDeath += OnEntityDeath;
@@ -320,9 +368,10 @@ namespace Multiworld
 			sapi.Event.BreakBlock += OnBreakBlock;
 			sapi.Event.RegisterGameTickListener(TimeAchievementCheck, 1000*60);
 			sapi.Event.RegisterGameTickListener(APInventoryCheck, 1000*3);
+            sapi.Event.PlayerDeath += OnPlayerDeath;
 			
 
-			infranet.init_server(api);
+            infranet.init_server(api);
 
         }
 
@@ -369,12 +418,6 @@ namespace Multiworld
 				.WithDescription("Print a list of remaining checks")
 				.HandleWith(infranet.print_remaining_locations);
 
-			capi.ChatCommands
-				.Create("testfunction")
-				.WithDescription("Tests a client side Function")
-				.WithArgs(capi.ChatCommands.Parsers.Word("code"), capi.ChatCommands.Parsers.Float("intensity"), capi.ChatCommands.Parsers.Int("duration"))
-				.HandleWith(TriggerPerception);
-
 			capi.Network.RegisterChannel("sendDiscovery")
 					.RegisterMessageType<SendArchipelagoDiscovery>();
 
@@ -385,11 +428,16 @@ namespace Multiworld
 				.RegisterMessageType<LocationExists>()
 				.SetMessageHandler<LocationExists>(ClientSendsLocation);
 
+			capi.Network.RegisterChannel("DeathlinkReceived")
+				.RegisterMessageType<ClientDeathLinkReceived>();
+
 			capi.Event.RegisterGameTickListener(ap_client.Flush, 1000*3);	    
 			capi.Event.RegisterGameTickListener(infranet.RequestAPItemReceive, 1000*3);
-			capi.Event.LevelFinalize += OnLevelFinalize;
+            capi.Event.RegisterEventBusListener(OnReceivedDeath, 1, "DeathLink");
+            capi.Event.LevelFinalize += OnLevelFinalize;
 			capi.Event.LeaveWorld += OnLeaveWorld;
 			capi.Event.InGameDiscovery += OnPlayerDiscovery;
+			
 
 			infranet.init_client(api, ap_client);
         }
@@ -409,7 +457,74 @@ namespace Multiworld
 				ap_client.APDisconnect();
 			}
 
-		public void APInventoryCheck(float dt)
+		public void OnPlayerDeath(IServerPlayer player, DamageSource source)
+		{
+			if(source == null)
+			{
+				return;
+			}
+			Entity? entitySource = source.GetCauseEntity();
+			string entityCode = "PreventEntityMsg";
+			string deathMsg = "";
+			if (entitySource != null) 
+			{ 
+				entityCode = entitySource.Code.ToString().Split(":")[1];
+			}
+			string damageType = source.Type.ToString();
+			foreach(var msg in deathLinkMessages)
+			{
+				if (entityCode == "locust-corrupt-sawblade")
+				{
+					if (msg.Key != "locust-corrupt-sawblade")
+					{
+						continue;
+					}
+                    deathMsg = msg.Value;
+                    break;
+                }
+				if (entityCode.Contains(msg.Key))
+				{
+					deathMsg = msg.Value;
+					break;
+                }
+				else if (msg.Key.Equals(damageType))
+				{
+                    deathMsg = msg.Value;
+					break;
+                }
+				else
+				{
+					deathMsg = "died from an unknown source";
+				}
+
+			}
+			string finalDeathMessage = ($" {deathMsg}");
+            APClient.SendDeathLink(player.PlayerName.ToString(), finalDeathMessage);
+		}
+
+		public void OnReceivedDeath(string eventName, ref EnumHandling handling, IAttribute data)
+		{
+            string JsonDeathLink = data.ToJsonToken();
+			string[] splitString = JsonDeathLink.Split('"');
+			string deathLink = $"{splitString[1]} {splitString[3]}";
+			foreach (IPlayer player in capi.World.AllOnlinePlayers)
+			{
+				if (player.Entity.Alive == true)
+				{
+                    capi.Network.GetChannel("DeathlinkReceived")
+						.SendPacket(new ClientDeathLinkReceived { deathlink = deathLink});
+				}
+			}
+			handling = EnumHandling.PreventSubsequent;
+		}
+
+        private void KillPlayer(IServerPlayer fromPlayer, ClientDeathLinkReceived packet)
+        {
+			fromPlayer.Entity.Die(EnumDespawnReason.Death);
+            sapi.SendMessageToGroup(GlobalConstants.GeneralChatGroup, packet.ToString(), EnumChatType.Notification);
+        }
+
+        public void APInventoryCheck(float dt)
 		{ //Check every inventory of every online player for foreign AP items and turn them into location checks
 			string[] inventories = ["backpack", "character", "hotbar"];
 			foreach(IServerPlayer player in sapi.World.AllOnlinePlayers)
@@ -502,8 +617,11 @@ namespace Multiworld
 
 		public void OnEntityDeath(Entity entity, DamageSource source)
 		{   //Check for kill achievements like Defeat a Bear
-			//Console.WriteLine(entity.Code.ToString());
 			int generation;
+			if(entity.Code == "game:blockfalling")
+			{
+				return;
+			}
 			if (source.GetCauseEntity() is EntityPlayer ePlayer and not null)
 			{
 				string code = entity.Code.ToString().Split(':')[1];
@@ -516,7 +634,6 @@ namespace Multiworld
 				{
 					if (Int32.TryParse(entity.WatchedAttributes["generation"].GetValue().ToString(), out int gen))
 					{
-						Console.WriteLine("we got gens");
 						if (gen >= 1 && KillAchievements.Keys.Contains(code))
 						{
 							TriggerAchievement("Achievement: " + KillAchievements[code], player.PlayerName);
@@ -527,10 +644,6 @@ namespace Multiworld
 				{
 					TriggerAchievement("Achievement: Against the Storm", player.PlayerName);
 				}
-			}
-			else
-			{
-				Console.WriteLine(entity.Code.ToString());
 			}
 		}
 
@@ -545,11 +658,9 @@ namespace Multiworld
 
         private void OnBreakBlock(IServerPlayer byPlayer, BlockSelection blockSel, ref float dropQuantityMultiplier, ref EnumHandling handling)
         {
-			Console.WriteLine(blockSel.Block.Code.ToString());
 			string block = blockSel.Block.Code.ToString().Split(":")[1];
 			List<string> southCrops = ["Pineapple", "Casava", "Amaranth", "Peanut"];
 			var downPos = blockSel.Position.DownCopy();
-			
 			Block blockBelow = sapi.World.BlockAccessor.GetBlock(downPos);
 			if (blockBelow.ToString().Contains("farmland") && BreakCropAchievements.Keys.Contains(block))
 			{
@@ -602,20 +713,11 @@ namespace Multiworld
 			TriggerAchievement(pkt.loc, player.PlayerName);
 		}
 
-		public TextCommandResult TriggerPerception(TextCommandCallingArgs arg)
-		{
-			capi.Render.PerceptionEffects.TriggerEffect(arg[0].ToString(), (float)arg[1]);
-			
-
-            return TextCommandResult.Success("Triggered function");
-        }
-
 		public void OnPlayerDiscovery(object sender, string discoverycode, string text)
 		{   //When a player gets a lore discovery doesn't matter which send a check
             JsonObject APConfig = capi.LoadModConfig("multiworld_config.json");
             Dictionary<string, Dictionary<string, string>> loc_list = capi.LoadModConfig<Dictionary<string, Dictionary<string, string>>>(APConfig["VSName"] + "_spoilers.json");
 			string loc_list_first = loc_list.First().Key;
-            Console.WriteLine("Hey we checked here" + Environment.NewLine);
             if(discoverycode.Split("-")[0] == "lore" && loc_list_first.Contains("lore-"))
 			{
 				capi.Network.GetChannel("triggerCheevo")
@@ -639,81 +741,25 @@ namespace Multiworld
 				foreach(var kvp in spoilers)
 				{
 					string match = "";
-					switch(trader.Code.ToString().Split(':')[1])
-					{
-						case "trader-male-agriculture-cold":
-						case "trader-female-agriculture-cold":
-                        case "trader-male-agriculture-temperate":
-                        case "trader-female-agriculture-temperate":
-                        case "trader-male-agriculture-desert":
-                        case "trader-female-agriculture-desert":
-                            match = "Agriculture";
-							break;
-                        case "trader-male-artisan-cold":
-                        case "trader-female-artisan-cold":
-                        case "trader-male-artisan-temperate":
-                        case "trader-female-artisan-temperate":
-                        case "trader-male-artisan-desert":
-                        case "trader-female-artisan-desert":
-                            match = "Artisan";
-							break;
-                        case "trader-male-buildmaterials-cold":
-                        case "trader-female-buildmaterials-cold":
-                        case "trader-male-buildmaterials-temperate":
-                        case "trader-female-buildmaterials-temperate":
-                        case "trader-male-buildmaterials-desert":
-                        case "trader-female-buildmaterials-desert":
-                            match = "Building";
-							break;
-                        case "trader-male-clothing-cold":
-                        case "trader-female-clothing-cold":
-                        case "trader-male-clothing-temperate":
-                        case "trader-female-clothing-temperate":
-                        case "trader-male-clothing-desert":
-                        case "trader-female-clothing-desert":
-                            match = "Clothing";
-							break;
-                        case "trader-male-commodities-cold":
-                        case "trader-female-commodities-cold":
-                        case "trader-male-commodities-temperate":
-                        case "trader-female-commodities-temperate":
-                        case "trader-male-commodities-desert":
-                        case "trader-female-commodities-desert":
-                            match = "Commodities";
-							break;
-                        case "trader-male-furniture-cold":
-                        case "trader-female-furniture-cold":
-                        case "trader-male-furniture-temperate":
-                        case "trader-female-furniture-temperate":
-                        case "trader-male-furniture-desert":
-                        case "trader-female-furniture-desert":
-                            match = "Furniture";
-							break;
-                        case "trader-male-luxuries-cold":
-                        case "trader-female-luxuries-cold":
-                        case "trader-male-luxuries-temperate":
-                        case "trader-female-luxuries-temperate":
-                        case "trader-male-luxuries-desert":
-                        case "trader-female-luxuries-desert":
-                            match = "Luxuries";
-							break;
-                        case "trader-male-survivalgoods-cold":
-                        case "trader-female-survivalgoods-cold":
-                        case "trader-male-survivalgoods-temperate":
-                        case "trader-female-survivalgoods-temperate":
-                        case "trader-male-survivalgoods-desert":
-                        case "trader-female-survivalgoods-desert":
-                            match = "Survival";
-							break;
-                        case "trader-male-treasurehunter-cold":
-                        case "trader-female-treasurehunter-cold":
-                        case "trader-male-treasurehunter-temperate":
-                        case "trader-female-treasurehunter-temperate":
-                        case "trader-male-treasurehunter-desert":
-                        case "trader-female-treasurehunter-desert":
-                            match = "Treasure";
-							break;
-					}
+					string traderCode = trader.Code.ToString().Split(':')[1];
+					if (traderCode.Contains("agriculture"))
+					{ match = "Agriculture"; }
+                    if (traderCode.Contains("artisan")) 
+					{ match = "Artisan"; }
+                    if (traderCode.Contains("buildmaterials")) 
+					{ match = "Building"; }
+                    if (traderCode.Contains("clothing")) 
+					{ match = "Clothing"; }
+                    if (traderCode.Contains("commodities")) 
+					{ match = "Commodities"; }
+                    if (traderCode.Contains("furniture")) 
+					{ match = "Furniture"; }
+                    if (traderCode.Contains("luxuries")) 
+					{ match = "Luxuries"; }
+                    if (traderCode.Contains("survivalgoods")) 
+					{ match = "Survival"; }
+                    if (traderCode.Contains("treasurehunter")) 
+					{ match = "Treasure"; }
 					if(match == "")
 						continue;	
 					if(kvp.Key.Contains(match + " Trader"))

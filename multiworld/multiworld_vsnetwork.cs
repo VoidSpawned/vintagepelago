@@ -9,12 +9,17 @@ using Vintagestory.API.Common.Entities;
 using Vintagestory.GameContent;
 using Vintagestory.Client.NoObf;
 using Vintagestory.Server;
+using Vintagestory.API.MathTools;
+using Vintagestory.Common;
+using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
+using Vintagestory.API.Util;
+using Vintagestory.API.Datastructures;
 
 //this file houses utils for managing communication between VS server and client, such as protobuf packets and text commands
 namespace Multiworld
 {
-	
-	[ProtoContract(ImplicitFields = ImplicitFields.AllPublic)]
+    #region ProtoContracts
+    [ProtoContract(ImplicitFields = ImplicitFields.AllPublic)]
 	public class APNotification
 	{
 		public string message;
@@ -35,6 +40,13 @@ namespace Multiworld
 	}
 
 	[ProtoContract(ImplicitFields = ImplicitFields.AllPublic)]
+	public class ClientDeathLinkReceived
+	{
+		public string deathlink;
+	}
+
+
+    [ProtoContract(ImplicitFields = ImplicitFields.AllPublic)]
 	public class SendArchipelagoDiscovery
 	{
 		public string loc;
@@ -52,6 +64,7 @@ namespace Multiworld
     {
         public string loc;
     }
+    #endregion
 
     public class Infranet
 	{
@@ -66,13 +79,13 @@ namespace Multiworld
 		public void init_server(ICoreServerAPI api)
 		{
 			sapi = api;
-            serverChannel = 
+			serverChannel =
 				api.Network.RegisterChannel("ap_notification")
-			    .RegisterMessageType(typeof(APNotification))
-			    .RegisterMessageType(typeof(ClientAPScoutPacket))
-			    .RegisterMessageType(typeof(ClientAPItemReceivePacket))
-			    .SetMessageHandler<ClientAPScoutPacket>(OnClientAPScoutPacket)
-			    .SetMessageHandler<ClientAPItemReceivePacket>(OnClientAPItemReceivePacket);
+				.RegisterMessageType(typeof(APNotification))
+				.RegisterMessageType(typeof(ClientAPScoutPacket))
+				.RegisterMessageType(typeof(ClientAPItemReceivePacket))
+				.SetMessageHandler<ClientAPScoutPacket>(OnClientAPScoutPacket)
+				.SetMessageHandler<ClientAPItemReceivePacket>(OnClientAPItemReceivePacket);
 		}
 
 		public void init_client(ICoreClientAPI api, APClient client)
@@ -147,7 +160,9 @@ namespace Multiworld
 		{ //tells the clients to check a location
 			serverChannel.BroadcastPacket(new APNotification(){ message = $"LocCheck;{loc};{player}" });
 		}
-	
+
+
+
 		private void OnClientAPScoutPacket(IPlayer fromPlayer, ClientAPScoutPacket packet)
 		{ //server stores a list of each registered client's locations:items
 			if (packet.ScoutData != null)
@@ -163,12 +178,10 @@ namespace Multiworld
 
 		public void RequestAPItemReceive(float dt)
 		{
-			//Console.WriteLine($"requesting: {string.Join(Environment.NewLine, ap_client.ap_items_to_receive)}");
 			if(ap_client.ap_items_to_receive.Count == 0)
 				return;
 			else
 			{
-				//Console.WriteLine("sending");
 				clientChannel.SendPacket(new ClientAPItemReceivePacket()
 				{
 					Player = capi.World.Player.PlayerName,
@@ -189,6 +202,7 @@ namespace Multiworld
 				string[] split = items[i].Split(':');
 				Item newItem;
 				Block newBlock;
+				IBlockAccessor accessor;
 				ItemStack stack = null;
 				int count = 1;
 				if(split[0] == "item" || split[0] == "quantity")
@@ -213,16 +227,121 @@ namespace Multiworld
 					}
 					stack = new ItemStack(newBlock, 1);
 				}
-				
-				if(stack == null)
+				else if (split[0] == "enemy")
+				{
+                    EntityProperties newEntityProp = sapi.World.GetEntityType(new AssetLocation(split[2]));
+                    EntityPos xyzPos = null;
+                    EntityPos enemyPos = null;
+                    Random rand = new Random();
+                    foreach (IServerPlayer serverplayer in sapi.World.AllOnlinePlayers)
+                    {
+                        xyzPos = serverplayer.Entity.Pos.Copy();
+                        xyzPos.Pitch = 0f;
+                        xyzPos.Roll = 0f;
+                        xyzPos.Yaw = 0f;
+                    }
+                    for (int y = 0; y < 5; y++)
+                    {
+                        Entity entity = sapi.World.ClassRegistry.CreateEntity(newEntityProp);
+                        enemyPos = xyzPos;
+                        enemyPos.X += rand.Next(-8, 8);
+                        enemyPos.Z += rand.Next(-8, 8);
+                        enemyPos.Y = sapi.World.BlockAccessor.GetRainMapHeightAt(enemyPos.AsBlockPos) + 1;
+                        if (entity != null)
+                        {
+                            entity.Pos.SetFrom(xyzPos);
+                            entity.PositionBeforeFalling.Set(entity.Pos.X, entity.Pos.Y, entity.Pos.Z);
+                            sapi.World.SpawnEntity(entity);
+                        }
+
+                    }
+                }
+				else if (split[0] == "stat")
+				{
+                    EntityStats playerstats = fromPlayer.Entity.Stats;
+					DamageSource source = new()
+					{
+						Source = EnumDamageSource.Void,
+						Type = EnumDamageType.Acid
+					};
+					ITreeAttribute hungerTree = fromPlayer.Entity.WatchedAttributes.GetTreeAttribute("hunger");
+                    switch (split[2])
+                    {
+                        case "damage":
+							fromPlayer.Entity.ReceiveDamage(source, 5f);
+                            break;
+                        case "satiety":
+							float currentsatiety = hungerTree.GetFloat("currentsaturation");
+							if (currentsatiety - 250f <= 0)
+							{
+								fromPlayer.Entity.ReceiveSaturation(-currentsatiety);
+							}
+							else
+							{
+                                fromPlayer.Entity.ReceiveSaturation(-250f);
+                            }
+                            break;
+						default:
+							string nutriType = split[2].Split("-")[1];
+							float currentNutri = hungerTree.GetFloat($"{nutriType}Level");
+							if(currentNutri - 250f <= 0)
+							{
+								hungerTree.SetFloat($"{nutriType}Level", 0f);
+								fromPlayer.Entity.WatchedAttributes.Set("hunger", hungerTree);
+							}
+							else
+							{
+                                hungerTree.SetFloat($"{nutriType}Level", currentNutri - 250f);
+                                fromPlayer.Entity.WatchedAttributes.Set("hunger", hungerTree);
+                            }
+							break;
+                    }
+					
+				}
+                else if (split[0] == "effect")
+                {
+					switch (split[2])
+					{
+						case "drunk":
+							fromPlayer.Entity.WatchedAttributes.SetFloat("intoxication", 1.5f);
+							break;
+						case "psychedelic":
+                            fromPlayer.Entity.WatchedAttributes.SetFloat("psychedelic", 2f);
+                            break;
+					}
+                    sapi.SendMessageToGroup(GlobalConstants.GeneralChatGroup, split[2] + " should be applied", EnumChatType.Notification);
+                }
+				else if (split[0] == "trait")
+				{
+					CharacterSystem classSystem = sapi.ModLoader.GetModSystem<CharacterSystem>();
+                    string characlass = fromPlayer.Entity.WatchedAttributes.GetString("characterClass");
+					if (traits[split[2]] == null)
+					{
+						string[] extraTraits = fromPlayer.Entity.WatchedAttributes.GetStringArray("extraTraits", []);
+						extraTraits.Append(split[2]);
+						fromPlayer.Entity.WatchedAttributes.SetStringArray("gainedTraits", extraTraits);
+                    }
+					else
+					{
+						Dictionary<string, float> traiteffects = traits[split[2]];
+						foreach (KeyValuePair<string, float> traitpart in traiteffects)
+						{
+							fromPlayer.Entity.Stats.Set(traitpart.Key, $"trait_{split[2]}", traitpart.Value);
+						}
+					}
+					classSystem.setCharacterClass(fromPlayer.Entity, characlass, initializeGear: false);
+                    sapi.SendMessageToGroup(GlobalConstants.GeneralChatGroup, split[2] + " should be applied", EnumChatType.Notification);
+                }
+				fromPlayer.Entity.WatchedAttributes.MarkAllDirty();
+                if (stack == null)
 					continue;
 
 				if(!inv.TryGiveItemstack(stack, true))
 				{
 					sapi.World.SpawnItemEntity(stack, fromPlayer.Entity.Pos.XYZ);
 				}
-				sapi.SendMessageToGroup(GlobalConstants.GeneralChatGroup, items[i] + "should be delivered", EnumChatType.Notification);
-			}
+                sapi.SendMessageToGroup(GlobalConstants.GeneralChatGroup, items[i] + " should be delivered", EnumChatType.Notification);
+            }
 		}
 
 		private void OnServerMessage(APNotification ap_notification)
@@ -239,5 +358,25 @@ namespace Multiworld
 				}
 			}
 		}
+
+		public static Dictionary<string, Dictionary<string, float>?> traits = new()
+		{
+			{"focused", new Dictionary<string,float>{ {"rangedWeaponsDamage", 0.2f }, { "rangedWeaponsAcc", 0.3f}, {"bowDrawingStrength", 0.2f} }},
+			{"resourceful", new Dictionary<string,float>{ {"animalLootDropRate", 0.1f}, {"animalHarvestingTime", -0.25f} }},
+			{"fleetfooted", new Dictionary<string,float>{ {"walkspeed", 0.1f} }},
+			{"forager", new Dictionary<string,float>{ {"forageDropRate", 0.1f}, {"wildCropDropRate", 0.2f} }},
+			{"pilferer", new Dictionary<string,float>{ {"vesselContentsDropRate", 0.15f}, {"rustyGearDropRate", 0.1f}, {"wholeVesselLootChance", 0.12f} }},
+			{"furtive", new Dictionary<string,float>{ {"animalSeekingRange", -0.35f } }},
+			{"precise", new Dictionary<string,float>{ {"mechanicalsDamage", 0.25f} }},
+			{"technical", new Dictionary<string,float>{ {"temporalGearTLRepairCost", -1f} }},
+			{"soldier", new Dictionary<string,float>{ {"meleeWeaponsDamage", 0.3f}, {"armorDurabilityLoss", -0.15f}, {"armorWalkSpeedAffectedness", -0.25f} }},
+			{"hardy", new Dictionary<string,float>{ {"miningSpeedMul", 0.1f}, {"maxhealthExtraPoints", 5f} }},
+			{"mender", new Dictionary<string,float>{ {"armorDurabilityLoss", -0.25f} }},
+			{"improviser", null},
+			{"tinkerer", null},
+			{"merciless", null},
+			{"clothier", null},
+			{"bowyer", null}
+		};
 	}
 }

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from Options import Choice, OptionGroup, PerGameCommonOptions, Range, Toggle, DefaultOnToggle
+from Options import Choice, OptionGroup, PerGameCommonOptions, Range, Toggle, DefaultOnToggle, OptionSet
 
 class Casual(Toggle):
     """
@@ -7,6 +7,11 @@ class Casual(Toggle):
     """
     display_name = "Casual"
 
+class DeathLink(Toggle):
+    """
+        Enable Deathlink
+    """
+    display_name = "Deathlink"
 class Prices(Range):
     """
         Price for AP items from traders. 
@@ -82,9 +87,29 @@ class ClothingFiller(Toggle):
 #    """
 #    display_name = "Dungeon Progression"
 
+class IncludedTraps(OptionSet):
+    """
+    Select which traps to include in the item pool
+    Enemy, Psychedelic, Drunk, Damage, Hunger, Nutrition
+    """
+    display_name = "Included Traps"
+    valid_keys = ["Enemy", "Psychedelic", "Drunk", "Damage", "Hunger", "Nutrition"]
+    default = ["Enemy", "Psychedelic", "Drunk", "Damage", "Hunger", "Nutrition"]
+
+class TrapChance(Range):
+    """
+    Sets the chance for traps to be generated instead of useful / filler items
+    WARNING if set to 100 progression through the game will become much slower
+    """
+    display_name = "Trap Chance"
+    range_start = 0
+    range_end = 100
+    default = 10
+
 @dataclass
 class VintageOptions(PerGameCommonOptions):
     casual: Casual
+    deathlink: DeathLink
     victory: VictoryCondition
     prices: Prices
     cropsplus: SouthernCrops
@@ -93,6 +118,8 @@ class VintageOptions(PerGameCommonOptions):
 #    temporal_chance: TemporalChance
     trader_progression: TraderProgression
 #    dungeon_progression: DungeonProgression
+    traplist: IncludedTraps
+    trapchance: TrapChance
 
 option_groups = [
         OptionGroup(
@@ -107,7 +134,9 @@ option_presets = {
             "lore_progression": 40,
             "cropsplus": 0,
             "trader_progression": False,
-#            "dungeon_progression": False
+#            "dungeon_progression": False,
+            "traplist": ["Enemy", "Psychedelic", "Drunk", "Damage", "Hunger", "Nutrition"],
+            "trapchance": 10
             },
         "Spicy": {
             "casual": False,
@@ -116,7 +145,9 @@ option_presets = {
             "lore_progression": 101,
             "cropsplus": 1,
             "trader_progression": True,
-#            "dungeon_progression": True
+#            "dungeon_progression": True,
+            "traplist": ["Enemy", "Psychedelic", "Drunk", "Damage", "Hunger", "Nutrition"],
+            "trapchance": 25
             },
         "Quicker game": {
             "casual": 0,
@@ -125,6 +156,8 @@ option_presets = {
             "lore_progression": 0,
             "cropsplus": 0,
             "trader_progression": False,
-#            "dungeon_progression": False
+#            "dungeon_progression": False,
+            "traplist": ["Psychedelic", "Drunk", "Nutrition"],
+            "trapchance": 5
             }
         }
